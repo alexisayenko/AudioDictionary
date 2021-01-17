@@ -18,18 +18,17 @@ namespace AudioDictionary
         private const string UrlRuWikiBaseHtml = "https://ru.wiktionary.org/wiki";
         private const string UrlEnWikiBaseHtml = "https://en.wiktionary.org/wiki";
 
-
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
             MediaFoundationInterop.MFStartup(0);
 
             // 1. Get list of files to download
-            var filesListToDownload = ReadFilesListToDownload(@"C:\Temp\AudioPlaying\words-list.txt");
+            var wordsList = ReadFilesListToDownload(@"C:\Temp\AudioPlaying\words-list.txt");
 
             // 2. Download files
             /// DownloadFiles(filesListToDownload, @"C:\Temp\AudioPlaying", FormUrlOxford);
-            DownloadAudioFromWiki(filesListToDownload, @"C:\Temp\AudioPlaying");
+            DownloadAudioFromWiki(wordsList, @"C:\Temp\AudioPlaying");
 
             // 3. Convert .ogg to .mp3 files
             ConvertDownloadedOggToMp3(@"C:\Temp\AudioPlaying");
@@ -67,32 +66,41 @@ namespace AudioDictionary
             ConvertOggToMp3(oggFiles);
         }
 
-        private static void DownloadFiles(Dictionary<string, string> filesListToDownload, string outputFolder, Func<string, string> formUrlFunctor)
+        private static void DownloadFiles(List<Word> wordsList, string outputFolder, Func<string, string> formUrlFunctor)
         {
             WebClient webClient = new WebClient();
 
-            foreach (var word in filesListToDownload.Keys)
+            foreach (var word in wordsList)
             {
-                var outputFile = $"{outputFolder}/{word}.ogg";
+                var outputFile = $"{outputFolder}/{word.English}.ogg";
 
                 if (File.Exists(outputFile))
                     continue;
 
-                var downloadUrl = formUrlFunctor(word);
+                var downloadUrl = formUrlFunctor(word.English);
 
                 webClient.DownloadFile(downloadUrl, outputFile);
             }
         }
 
-        private static void DownloadAudioFromWiki(Dictionary<string, string> filesListToDownload, string outputFolder)
+        private static void DownloadAudioFromWiki(List<Word> wordsList, string outputFolder)
         {
             WebClient webClient = new WebClient();
 
-            foreach (var key in filesListToDownload.Keys)
+            foreach (var word in wordsList)
             {
-                // First, download En word from En wiki
-                var wordEn = key;
+                // Check if file exists
+                var wordEn = word.English;
+                var wordRu = word.Russian;
 
+                if (File.Exists($"{outputFolder}\\{wordEn}.ogg") && File.Exists($"{outputFolder}\\{wordRu}.ogg"))
+                {
+                    Console.WriteLine($"Skipping words pair '{wordEn}={wordRu}' as files are already downloaded");
+                    word.HasAudio = true;
+                    continue;
+                }
+
+                // First, download En word from En wiki
                 var urlOggEn = GetWikiUrl(webClient, UrlEnWikiBaseHtml, wordEn);
                 if (string.IsNullOrEmpty(urlOggEn))
                     urlOggEn = GetOxfordUrl(wordEn);
@@ -100,16 +108,14 @@ namespace AudioDictionary
                 if (string.IsNullOrEmpty(urlOggEn))
                     Console.WriteLine("---> Not Found");
 
-
                 // Then download Ru word from En wiki
-                var wordRu = filesListToDownload[key];
                 var urlOggRu = GetWikiUrl(webClient, UrlEnWikiBaseHtml, wordRu);
                 if (string.IsNullOrEmpty(urlOggRu))
                     urlOggRu = GetWikiUrl(webClient, UrlRuWikiBaseHtml, wordRu);
 
                 if (string.IsNullOrEmpty(urlOggRu) || string.IsNullOrEmpty(urlOggEn))
                 {
-                    Console.WriteLine($"Skipping words pair '{wordEn}'='{wordRu}' due to missing audio files");
+                    Console.WriteLine($"[!] Skipping words pair '{wordEn}'='{wordRu}' due to missing audio files");
                     continue;
                 }
 
@@ -117,6 +123,7 @@ namespace AudioDictionary
 
                 webClient.DownloadFile(urlOggEn, $"{outputFolder}\\{wordEn}.ogg");
                 webClient.DownloadFile(urlOggRu, $"{outputFolder}\\{wordRu}.ogg");
+                word.HasAudio = true;
             }
         }
 
@@ -150,9 +157,9 @@ namespace AudioDictionary
             return result;
         }
 
-        private static Dictionary<string, string> ReadFilesListToDownload(string fileName)
+        private static List<Word> ReadFilesListToDownload(string fileName)
         {
-            var result = new Dictionary<string, string>();
+            var result = new List<Word>();
 
             var content = File.ReadAllLines(fileName);
 
@@ -161,7 +168,11 @@ namespace AudioDictionary
                 string[] keyvalue = line.Split('=');
                 if (keyvalue.Length == 2)
                 {
-                    result.Add(keyvalue[0].Trim(), keyvalue[1].Trim());
+                    var word = new Word();
+                    word.English = keyvalue[0].Trim();
+                    word.Russian = keyvalue[1].Trim();
+
+                    result.Add(word);
                 }
             }
 
