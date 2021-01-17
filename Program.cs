@@ -17,6 +17,7 @@ namespace AudioDictionary
         private const string UrlWikiBaseOgg = "https://upload.wikimedia.org/wikipedia/commons";
         private const string UrlRuWikiBaseHtml = "https://ru.wiktionary.org/wiki";
         private const string UrlEnWikiBaseHtml = "https://en.wiktionary.org/wiki";
+        private const string WorkingDirectory = @"C:\Temp\AudioPlaying";
 
         static void Main(string[] args)
         {
@@ -27,43 +28,74 @@ namespace AudioDictionary
             var wordsList = ReadFilesListToDownload(@"C:\Temp\AudioPlaying\words-list.txt");
 
             // 2. Download files
-            /// DownloadFiles(filesListToDownload, @"C:\Temp\AudioPlaying", FormUrlOxford);
-            DownloadAudioFromWiki(wordsList, @"C:\Temp\AudioPlaying");
+            DownloadAudioFromWiki(wordsList);
 
             // 3. Convert .ogg to .mp3 files
-            ConvertDownloadedOggToMp3(@"C:\Temp\AudioPlaying");
+            ConvertDownloadedAudio(wordsList);
 
             // 4. Merge all files into one result mp3
-            MergeFiles(@"C:\Temp\AudioPlaying", @"C:\Temp\AudioPlaying\result.mp3");
+            MergeFiles(wordsList, "result.mp3");
 
             Console.ReadKey();
         }
 
-        private static void MergeFiles(string folderPath, string outputFile)
+        private static void MergeFiles(List<Word> wordsList, string outputFile)
         {
-            var inputFiles = Directory.GetFiles(folderPath, "*.mp3");
+            var outputStream = new FileStream($@"{WorkingDirectory}\{outputFile}", FileMode.Create);
 
-            var outputStream = new FileStream(outputFile, FileMode.Create);
-
-            foreach (string file in inputFiles)
+            foreach (var word in wordsList)
             {
-                Mp3FileReader reader = new Mp3FileReader(file);
-                if ((outputStream.Position == 0) && (reader.Id3v2Tag != null))
-                {
-                    outputStream.Write(reader.Id3v2Tag.RawData, 0, reader.Id3v2Tag.RawData.Length);
-                }
-                Mp3Frame frame;
-                while ((frame = reader.ReadNextFrame()) != null)
-                {
-                    outputStream.Write(frame.RawData, 0, frame.RawData.Length);
-                }
+                if (!word.HasAudio)
+                    continue;
+
+                var fileName = $@"{WorkingDirectory}\{word.English}.mp3";
+                MergeFile(fileName, outputStream);
+                fileName = $@"{WorkingDirectory}\{word.Russian}.mp3";
+                MergeFile(fileName, outputStream);
             }
         }
 
-        private static void ConvertDownloadedOggToMp3(string folderPath)
+        private static void MergeFile(string fileName, FileStream outputStream)
         {
-            var oggFiles = Directory.GetFiles(folderPath, "*.ogg");
-            ConvertOggToMp3(oggFiles);
+            var reader = new Mp3FileReader(fileName);
+
+            if ((outputStream.Position == 0) && (reader.Id3v2Tag != null))
+            {
+                outputStream.Write(reader.Id3v2Tag.RawData, 0, reader.Id3v2Tag.RawData.Length);
+            }
+            Mp3Frame frame;
+            while ((frame = reader.ReadNextFrame()) != null)
+            {
+                outputStream.Write(frame.RawData, 0, frame.RawData.Length);
+            }
+        }
+
+        private static void ConvertDownloadedAudio(List<Word> wordsList)
+        {
+            foreach (var word in wordsList)
+            {
+                if (!word.HasAudio)
+                    continue;
+
+                word.HasAudio = ConvertOggToMp3($"{WorkingDirectory}\\{word.English}.ogg");
+                word.HasAudio &= ConvertOggToMp3($"{WorkingDirectory}\\{word.Russian}.ogg");
+            }
+        }
+
+        private static bool ConvertOggToMp3(string fileName)
+        {
+            var oggReader = new VorbisWaveReader(fileName);
+            try
+            {
+                MediaFoundationEncoder.EncodeToMp3(oggReader, fileName.Replace(".ogg", ".mp3"), 128000);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"(!) No Suitable Encoder for {Path.GetFileNameWithoutExtension(fileName)}");
+                return false;
+            }
+
+            return true;
         }
 
         private static void DownloadFiles(List<Word> wordsList, string outputFolder, Func<string, string> formUrlFunctor)
@@ -83,7 +115,7 @@ namespace AudioDictionary
             }
         }
 
-        private static void DownloadAudioFromWiki(List<Word> wordsList, string outputFolder)
+        private static void DownloadAudioFromWiki(List<Word> wordsList)
         {
             WebClient webClient = new WebClient();
 
@@ -93,14 +125,14 @@ namespace AudioDictionary
                 var wordEn = word.English;
                 var wordRu = word.Russian;
 
-                if (File.Exists($"{outputFolder}\\{wordEn}.ogg") && File.Exists($"{outputFolder}\\{wordRu}.ogg"))
+                if (File.Exists($"{WorkingDirectory}\\{wordEn}.ogg") && File.Exists($"{WorkingDirectory}\\{wordRu}.ogg"))
                 {
                     Console.WriteLine($"Skipping words pair '{wordEn}={wordRu}' as files are already downloaded");
                     word.HasAudio = true;
                     continue;
                 }
 
-                // First, download En word from En wiki
+                // First, download En word from En wiki and Oxford
                 var urlOggEn = GetWikiUrl(webClient, UrlEnWikiBaseHtml, wordEn);
                 if (string.IsNullOrEmpty(urlOggEn))
                     urlOggEn = GetOxfordUrl(wordEn);
@@ -108,7 +140,7 @@ namespace AudioDictionary
                 if (string.IsNullOrEmpty(urlOggEn))
                     Console.WriteLine("---> Not Found");
 
-                // Then download Ru word from En wiki
+                // Then download Ru word from En and Ru wiki
                 var urlOggRu = GetWikiUrl(webClient, UrlEnWikiBaseHtml, wordRu);
                 if (string.IsNullOrEmpty(urlOggRu))
                     urlOggRu = GetWikiUrl(webClient, UrlRuWikiBaseHtml, wordRu);
@@ -121,8 +153,8 @@ namespace AudioDictionary
 
                 Console.WriteLine($"Downloading words pair '{wordEn}'='{wordRu}'");
 
-                webClient.DownloadFile(urlOggEn, $"{outputFolder}\\{wordEn}.ogg");
-                webClient.DownloadFile(urlOggRu, $"{outputFolder}\\{wordRu}.ogg");
+                webClient.DownloadFile(urlOggEn, $"{WorkingDirectory}\\{wordEn}.ogg");
+                webClient.DownloadFile(urlOggRu, $"{WorkingDirectory}\\{wordRu}.ogg");
                 word.HasAudio = true;
             }
         }
@@ -135,7 +167,16 @@ namespace AudioDictionary
             {
                 var html = webClient.DownloadString($"{baseUrl}/{word}");
                 var matches = Regex.Match(html, "<source src=\"//upload.wikimedia.org/wikipedia/commons.+\\.ogg\" type");
-                urlOgg = matches.Value.Replace("<source src=\"", "https:").Replace("\" type", string.Empty);
+
+                html = matches.Value;
+
+                if (html.Contains("type=\"audio/mpeg\""))
+                {
+                    var r = Regex.Match(html, "<source src=.+<source src=");
+                    html = html.Remove(0, r.Length - 12);
+                }
+
+                urlOgg = html.Replace("<source src=\"", "https:").Replace("\" type", string.Empty);
             }
             catch (Exception)
             {
@@ -177,15 +218,6 @@ namespace AudioDictionary
             }
 
             return result;
-        }
-
-        static void ConvertOggToMp3(string[] fileNames)
-        {
-            foreach (var fileName in fileNames)
-            {
-                var oggReader = new VorbisWaveReader(fileName);
-                MediaFoundationEncoder.EncodeToMp3(oggReader, fileName.Replace(".ogg", ".mp3"));
-            }
         }
 
         static void MergeOgg(string[] inputFiles, string outputFile)
