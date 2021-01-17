@@ -9,4 +9,10 @@
     <PackageReference Include="NAudio.Vorbis" Version="1.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="silence-0.5s.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

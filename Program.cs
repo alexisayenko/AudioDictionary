@@ -18,6 +18,7 @@ namespace AudioDictionary
         private const string UrlRuWikiBaseHtml = "https://ru.wiktionary.org/wiki";
         private const string UrlEnWikiBaseHtml = "https://en.wiktionary.org/wiki";
         private const string WorkingDirectory = @"C:\Temp\AudioPlaying";
+        private const string Silence05sec = "silence-0.5s.mp3";
 
         static void Main(string[] args)
         {
@@ -28,15 +29,24 @@ namespace AudioDictionary
             var wordsList = ReadFilesListToDownload(@"C:\Temp\AudioPlaying\words-list.txt");
 
             // 2. Download files
-            DownloadAudioFromWiki(wordsList);
+            DownloadAudio(wordsList);
 
             // 3. Convert .ogg to .mp3 files
             ConvertDownloadedAudio(wordsList);
 
-            // 4. Merge all files into one result mp3
+            // 4. Normalize .mp3 files
+            NormalizeAudio(wordsList);
+
+            // 5. Merge all files into one result mp3
             MergeFiles(wordsList, "result.mp3");
 
             Console.ReadKey();
+        }
+
+        private static void NormalizeAudio(List<Word> wordsList)
+        {
+            // Trim empy sound
+            // Normalize Volume
         }
 
         private static void MergeFiles(List<Word> wordsList, string outputFile)
@@ -48,12 +58,28 @@ namespace AudioDictionary
                 if (!word.HasAudio)
                     continue;
 
-                var fileName = $@"{WorkingDirectory}\{word.English}.mp3";
+                var fileName = $@"{WorkingDirectory}\{word.Russian}.mp3";
                 MergeFile(fileName, outputStream);
-                fileName = $@"{WorkingDirectory}\{word.Russian}.mp3";
+                MergeFile(Silence05sec, outputStream);
+                MergeFile(Silence05sec, outputStream);
+
+                fileName = $@"{WorkingDirectory}\{word.English}.mp3";
                 MergeFile(fileName, outputStream);
+                MergeFile(Silence05sec, outputStream);
+                MergeFile(fileName, outputStream);
+                MergeFile(Silence05sec, outputStream);
+                MergeFile(fileName, outputStream);
+                MergeFile(Silence05sec, outputStream);
+                MergeFile(fileName, outputStream);
+                MergeFile(Silence05sec, outputStream);
+                MergeFile(fileName, outputStream);
+                MergeFile(Silence05sec, outputStream);
+
+                MergeFile(Silence05sec, outputStream);
+                MergeFile(Silence05sec, outputStream);
             }
         }
+
 
         private static void MergeFile(string fileName, FileStream outputStream)
         {
@@ -115,7 +141,7 @@ namespace AudioDictionary
             }
         }
 
-        private static void DownloadAudioFromWiki(List<Word> wordsList)
+        private static void DownloadAudio(List<Word> wordsList)
         {
             WebClient webClient = new WebClient();
 
@@ -133,9 +159,9 @@ namespace AudioDictionary
                 }
 
                 // First, download En word from En wiki and Oxford
-                var urlOggEn = GetWikiUrl(webClient, UrlEnWikiBaseHtml, wordEn);
+                var urlOggEn = GetOxfordUrl(wordEn);
                 if (string.IsNullOrEmpty(urlOggEn))
-                    urlOggEn = GetOxfordUrl(wordEn);
+                    urlOggEn = GetWikiUrl(webClient, UrlEnWikiBaseHtml, wordEn);
 
                 if (string.IsNullOrEmpty(urlOggEn))
                     Console.WriteLine("---> Not Found");
@@ -194,6 +220,10 @@ namespace AudioDictionary
             var part3 = paddedWord.Substring(0, 5);
 
             var result = $"{UlrEnBase}/{part1}/{part2}/{part3}/{word}{UrlEnPostfix}";
+
+            // todo: remove workaround
+            if (word == "act")
+                result = result.Replace("us_1.ogg", "us_2.ogg");
 
             return result;
         }
