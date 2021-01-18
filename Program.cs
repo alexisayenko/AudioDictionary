@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace AudioDictionary
 {
@@ -40,6 +41,10 @@ namespace AudioDictionary
             // 5. Merge all files into one result mp3
             MergeFiles(wordsList, "result.mp3");
 
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine($"Done. {wordsList.Count(w => w.HasAudio)} words has been merged.");
+
             Console.ReadKey();
         }
 
@@ -47,6 +52,7 @@ namespace AudioDictionary
         {
             // Trim empy sound
             // Normalize Volume
+            // Speed/Tempo?
         }
 
         private static void MergeFiles(List<Word> wordsList, string outputFile)
@@ -110,9 +116,10 @@ namespace AudioDictionary
 
         private static bool ConvertOggToMp3(string fileName)
         {
-            var oggReader = new VorbisWaveReader(fileName);
             try
             {
+                var oggReader = new VorbisWaveReader(fileName);
+
                 MediaFoundationEncoder.EncodeToMp3(oggReader, fileName.Replace(".ogg", ".mp3"), 128000);
             }
             catch (Exception)
@@ -145,15 +152,20 @@ namespace AudioDictionary
         {
             WebClient webClient = new WebClient();
 
+            var counter = 0;
+            var total = wordsList.Count;
+
             foreach (var word in wordsList)
             {
+                counter++;
+
                 // Check if file exists
                 var wordEn = word.English;
                 var wordRu = word.Russian;
 
                 if (File.Exists($"{WorkingDirectory}\\{wordEn}.ogg") && File.Exists($"{WorkingDirectory}\\{wordRu}.ogg"))
                 {
-                    Console.WriteLine($"Skipping words pair '{wordEn}={wordRu}' as files are already downloaded");
+                    Console.WriteLine($"{counter}/{total} Skipping words pair '{wordEn}={wordRu}' as files are already downloaded");
                     word.HasAudio = true;
                     continue;
                 }
@@ -173,11 +185,11 @@ namespace AudioDictionary
 
                 if (string.IsNullOrEmpty(urlOggRu) || string.IsNullOrEmpty(urlOggEn))
                 {
-                    Console.WriteLine($"[!] Skipping words pair '{wordEn}'='{wordRu}' due to missing audio files");
+                    Console.WriteLine($"{counter}/{total} [!] Skipping words pair '{wordEn}'='{wordRu}' due to missing audio files");
                     continue;
                 }
 
-                Console.WriteLine($"Downloading words pair '{wordEn}'='{wordRu}'");
+                Console.WriteLine($"{counter}/{total} Downloading words pair '{wordEn}'='{wordRu}'");
 
                 webClient.DownloadFile(urlOggEn, $"{WorkingDirectory}\\{wordEn}.ogg");
                 webClient.DownloadFile(urlOggRu, $"{WorkingDirectory}\\{wordRu}.ogg");
@@ -214,6 +226,10 @@ namespace AudioDictionary
 
         private static string GetOxfordUrl(string word)
         {
+            // todo: remove workaround
+            if (word == "condition" || word == "contain")
+                word = $"x{word}";
+
             var paddedWord = word.PadRight(5, '_');
             var part1 = paddedWord.Substring(0, 1);
             var part2 = paddedWord.Substring(0, 3);
@@ -222,7 +238,7 @@ namespace AudioDictionary
             var result = $"{UlrEnBase}/{part1}/{part2}/{part3}/{word}{UrlEnPostfix}";
 
             // todo: remove workaround
-            if (word == "act")
+            if (word == "act" || word == "cap")
                 result = result.Replace("us_1.ogg", "us_2.ogg");
 
             return result;
