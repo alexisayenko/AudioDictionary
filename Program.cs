@@ -20,7 +20,7 @@ namespace AudioDictionary
         private const string UrlWikiBaseOgg = "https://upload.wikimedia.org/wikipedia/commons";
         private const string UrlRuWikiBaseHtml = "https://ru.wiktionary.org/wiki";
         private const string UrlEnWikiBaseHtml = "https://en.wiktionary.org/wiki";
-        private const string WorkingDirectory = @"/tmp/audio-dictionary";
+        private const string WorkingDirectory = @"/srv/audio-dictionary";
         private const string Silence05sec = "silence-0.5s.mp3";
 
         static void Main(string[] args)
@@ -31,6 +31,8 @@ namespace AudioDictionary
                 MediaFoundationInterop.MFStartup(0);
 
             var wordsFile = args.Length > 0 ? args[0] : @"/tmp/words-list.txt";
+
+            Console.WriteLine($"Reading words list from {wordsFile}");
 
             // 1. Get list of files to download
             var wordsList = ReadFilesListToDownload(wordsFile);
