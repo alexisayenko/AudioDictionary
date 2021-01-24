@@ -8,6 +8,8 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Diagnostics;
+using System.Threading;
 
 namespace AudioDictionary
 {
@@ -18,16 +20,20 @@ namespace AudioDictionary
         private const string UrlWikiBaseOgg = "https://upload.wikimedia.org/wikipedia/commons";
         private const string UrlRuWikiBaseHtml = "https://ru.wiktionary.org/wiki";
         private const string UrlEnWikiBaseHtml = "https://en.wiktionary.org/wiki";
-        private const string WorkingDirectory = @"C:\Temp\AudioPlaying";
+        private const string WorkingDirectory = @"/tmp/audio-dictionary";
         private const string Silence05sec = "silence-0.5s.mp3";
 
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            MediaFoundationInterop.MFStartup(0);
+
+            if (!IsLinux)
+                MediaFoundationInterop.MFStartup(0);
+
+            var wordsFile = args.Length > 0 ? args[0] : @"/tmp/words-list.txt";
 
             // 1. Get list of files to download
-            var wordsList = ReadFilesListToDownload(@"C:\Temp\AudioPlaying\words-list.txt");
+            var wordsList = ReadFilesListToDownload(wordsFile);
 
             // 2. Download files
             DownloadAudio(wordsList);
@@ -39,13 +45,22 @@ namespace AudioDictionary
             NormalizeAudio(wordsList);
 
             // 5. Merge all files into one result mp3
-            MergeFiles(wordsList, "result.mp3");
+            MergeFiles(wordsList, Path.Combine(WorkingDirectory, "!result.mp3"));
 
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine($"Done. {wordsList.Count(w => w.HasAudio)} words has been merged.");
 
             Console.ReadKey();
+        }
+
+        public static bool IsLinux
+        {
+            get
+            {
+                int p = (int)Environment.OSVersion.Platform;
+                return (p == 4) || (p == 6) || (p == 128);
+            }
         }
 
         private static void NormalizeAudio(List<Word> wordsList)
@@ -57,37 +72,85 @@ namespace AudioDictionary
 
         private static void MergeFiles(List<Word> wordsList, string outputFile)
         {
-            var outputStream = new FileStream($@"{WorkingDirectory}\{outputFile}", FileMode.Create);
+            if (IsLinux)
+                MergeFilesLinux(wordsList, outputFile);
+            else
+                MergeFilesWindows(wordsList, outputFile);
+        }
+
+        private static void MergeFilesLinux(List<Word> wordsList, string outputFile)
+        {
+            var lines = new List<string>();
+
+            foreach(var word in wordsList)
+            {
+                if (!word.HasAudio)
+                    continue;
+
+                lines.Add($"file '{GetFullPath(word.Russian)}.mp3'");
+                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+            }
+
+            var textFile = Path.Combine(WorkingDirectory, "mylist.txt");
+
+            File.WriteAllLines(textFile, lines);
+
+            Thread.Sleep(1000);
+
+            // ffmpeg -f concat -safe 0 -i mylist.txt -c copy output.wav
+            ExecuteFFMPEG($" -y -f concat -safe 0 -i {textFile} -c copy {outputFile}");
+        }
+
+        private static string GetFullPath(string fileName)
+        {
+            return Path.Combine(WorkingDirectory, fileName);
+        }
+
+        private static void MergeFilesWindows(List<Word> wordsList, string outputFile)
+        {
+            var outputStream = new FileStream(Path.Combine(WorkingDirectory, outputFile), FileMode.Create);
 
             foreach (var word in wordsList)
             {
                 if (!word.HasAudio)
                     continue;
 
-                var fileName = $@"{WorkingDirectory}\{word.Russian}.mp3";
-                MergeFile(fileName, outputStream);
-                MergeFile(Silence05sec, outputStream);
-                MergeFile(Silence05sec, outputStream);
+                var fileName = Path.Combine(WorkingDirectory, $"{word.Russian}.mp3");
+                MergeFileWindows(fileName, outputStream);
+                MergeFileWindows(Silence05sec, outputStream);
+                MergeFileWindows(Silence05sec, outputStream);
 
-                fileName = $@"{WorkingDirectory}\{word.English}.mp3";
-                MergeFile(fileName, outputStream);
-                MergeFile(Silence05sec, outputStream);
-                MergeFile(fileName, outputStream);
-                MergeFile(Silence05sec, outputStream);
-                MergeFile(fileName, outputStream);
-                MergeFile(Silence05sec, outputStream);
-                MergeFile(fileName, outputStream);
-                MergeFile(Silence05sec, outputStream);
-                MergeFile(fileName, outputStream);
-                MergeFile(Silence05sec, outputStream);
-
-                MergeFile(Silence05sec, outputStream);
-                MergeFile(Silence05sec, outputStream);
+                fileName = Path.Combine(WorkingDirectory, $"{word.English}.mp3");
+                MergeFileWindows(fileName, outputStream);
+                MergeFileWindows(Silence05sec, outputStream);
+                MergeFileWindows(fileName, outputStream);
+                MergeFileWindows(Silence05sec, outputStream);
+                MergeFileWindows(fileName, outputStream);
+                MergeFileWindows(Silence05sec, outputStream);
+                MergeFileWindows(fileName, outputStream);
+                MergeFileWindows(Silence05sec, outputStream);
+                MergeFileWindows(fileName, outputStream);
+                MergeFileWindows(Silence05sec, outputStream);
+                         
+                MergeFileWindows(Silence05sec, outputStream);
+                MergeFileWindows(Silence05sec, outputStream);
             }
         }
-
-
-        private static void MergeFile(string fileName, FileStream outputStream)
+  
+        private static void MergeFileWindows(string fileName, FileStream outputStream)
         {
             var reader = new Mp3FileReader(fileName);
 
@@ -109,8 +172,8 @@ namespace AudioDictionary
                 if (!word.HasAudio)
                     continue;
 
-                word.HasAudio = ConvertOggToMp3($"{WorkingDirectory}\\{word.English}.ogg");
-                word.HasAudio &= ConvertOggToMp3($"{WorkingDirectory}\\{word.Russian}.ogg");
+                word.HasAudio = ConvertOggToMp3(Path.Combine(WorkingDirectory, $"{word.English}.ogg"));
+                word.HasAudio &= ConvertOggToMp3(Path.Combine(WorkingDirectory, $"{word.Russian}.ogg"));
             }
         }
 
@@ -118,17 +181,63 @@ namespace AudioDictionary
         {
             try
             {
-                var oggReader = new VorbisWaveReader(fileName);
-
-                MediaFoundationEncoder.EncodeToMp3(oggReader, fileName.Replace(".ogg", ".mp3"), 128000);
+                EncodeToMp3(fileName);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine($"(!) No Suitable Encoder for {Path.GetFileNameWithoutExtension(fileName)}");
+                // Console.WriteLine($"(!) No Suitable Encoder for {Path.GetFileNameWithoutExtension(fileName)}");
+                Console.WriteLine("XXXXXXXXXXXX");
+                Console.WriteLine(ex);
                 return false;
             }
 
             return true;
+        }
+
+        private static void EncodeToMp3(string fileName)
+        {
+            if (IsLinux)
+                EncodeToMp3Linux(fileName);
+            else
+                EncodeToMp3Windows(fileName);
+        }
+
+        private static void EncodeToMp3Windows(string fileName)
+        {
+            var oggReader = new VorbisWaveReader(fileName);
+            MediaFoundationEncoder.EncodeToMp3(oggReader, fileName.Replace(".ogg", ".mp3"), 128000);
+        }
+
+        private static void ExecuteFFMPEG(string parameters)
+        {
+            Process proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "ffmpeg",
+                    Arguments = parameters,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true                    
+                }
+            };
+
+            Console.WriteLine("!:>" + proc.StartInfo.Arguments);
+
+            proc.Start();
+            while (!proc.StandardOutput.EndOfStream)
+            {
+                string line = proc.StandardOutput.ReadLine();
+                // Console.WriteLine(line);
+            }
+        }
+
+        private static void EncodeToMp3Linux(string filename)
+        {
+            var outputFile = Path.Combine(WorkingDirectory, Path.GetFileNameWithoutExtension(filename) + ".mp3");
+            var parameters = $" -i {filename} -vn -n -ar 44100 -ac 2 -b:a 128k {outputFile}";
+
+            ExecuteFFMPEG(parameters);
         }
 
         private static void DownloadFiles(List<Word> wordsList, string outputFolder, Func<string, string> formUrlFunctor)
@@ -163,7 +272,8 @@ namespace AudioDictionary
                 var wordEn = word.English;
                 var wordRu = word.Russian;
 
-                if (File.Exists($"{WorkingDirectory}\\{wordEn}.ogg") && File.Exists($"{WorkingDirectory}\\{wordRu}.ogg"))
+                if (File.Exists(Path.Combine(WorkingDirectory, $"{wordEn}.ogg")) &&
+                    File.Exists(Path.Combine(WorkingDirectory, $"{wordRu}.ogg")))
                 {
                     Console.WriteLine($"{counter}/{total} Skipping words pair '{wordEn}={wordRu}' as files are already downloaded");
                     word.HasAudio = true;
@@ -191,8 +301,8 @@ namespace AudioDictionary
 
                 Console.WriteLine($"{counter}/{total} Downloading words pair '{wordEn}'='{wordRu}'");
 
-                webClient.DownloadFile(urlOggEn, $"{WorkingDirectory}\\{wordEn}.ogg");
-                webClient.DownloadFile(urlOggRu, $"{WorkingDirectory}\\{wordRu}.ogg");
+                webClient.DownloadFile(urlOggEn, Path.Combine(WorkingDirectory, $"{wordEn}.ogg"));
+                webClient.DownloadFile(urlOggRu, Path.Combine(WorkingDirectory, $"{wordRu}.ogg"));
                 word.HasAudio = true;
             }
         }
