@@ -31,6 +31,7 @@ namespace AudioDictionary
                 MediaFoundationInterop.MFStartup(0);
 
             var wordsFile = args.Length > 0 ? args[0] : @"/tmp/words-list.txt";
+            var outputResultMp3 = args.Length > 1 ? args[1] : "!result.mp3";
 
             Console.WriteLine($"Reading words list from {wordsFile}");
 
@@ -41,19 +42,21 @@ namespace AudioDictionary
             DownloadAudio(wordsList);
 
             // 3. Convert .ogg to .mp3 files
+            Console.WriteLine();
+            Console.WriteLine("Converting donwloaded OGG files to MP3");
             ConvertDownloadedAudio(wordsList);
 
             // 4. Normalize .mp3 files
             NormalizeAudio(wordsList);
 
             // 5. Merge all files into one result mp3
-            MergeFiles(wordsList, Path.Combine(WorkingDirectory, "!result.mp3"));
+            Console.WriteLine();
+            Console.WriteLine("Merging all files into one result MP3");
+            MergeFiles(wordsList, Path.Combine(WorkingDirectory, outputResultMp3));
 
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine($"Done. {wordsList.Count(w => w.HasAudio)} words has been merged.");
-
-            // Console.ReadKey();
         }
 
         public static bool IsLinux
@@ -121,7 +124,7 @@ namespace AudioDictionary
             var binPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             var fullSilencePathFrom = Path.Combine(binPath, Silence05sec);
             var fullSilencePathTo = GetFullPath(Silence05sec);
-            Console.WriteLine($"{fullSilencePathFrom} >> {fullSilencePathTo}");
+            
             File.Copy(fullSilencePathFrom, fullSilencePathTo, true);
         }
 

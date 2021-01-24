@@ -10,8 +10,8 @@ Used components
 
 
 TODO:
-- css styles for the website
-- guids for generated mp3 dicitonaries
++ css styles for the website
++ guids for generated mp3 dicitonaries
 - if _us_1 does not exist, try _us_2 autuomatically
-- restrict max lines
-- amend deploy script to deploy also the website
++ restrict max lines
++ amend deploy script to deploy also the website

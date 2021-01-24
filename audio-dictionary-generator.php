@@ -10,41 +10,55 @@
 
 <body>
 
+    <?php
+    function GUID()
+    {
+        if (function_exists('com_create_guid') === true) {
+            return trim(com_create_guid(), '{}');
+        }
+
+        return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
+    } ?>
+
     <form class="pure-form-stacked" method="post" action="audio-dictionary-generator.php">
         <fieldset>
-            <textarea style="resize:none;" rows="20" cols="70" name="user_input"></textarea>
+            <textarea maxlength="1000" style="resize:none;" rows="15" cols="70" name="user_input"></textarea>
             <input class="pure-button pure-button-primary" type="submit" class='button' value="Create" />
             <br /><br />
 
             <?php
-            $words_list = $_POST['user_input'];
+            $user_input = $_POST['user_input'];
 
-            if ($words_list == "")
+            if ($user_input == "")
                 return;
 
             // Save user input
-            $words_list_file = fopen("/tmp/audio-dictionary-words-list.txt", "w") or die("Unable to open file!");
-            $txt = "\n";
-            fwrite($words_list_file, $words_list);
-            fclose($words_list_file);
+            $guid = GUID();
+            $words_file_name = "/tmp/{$guid}.txt";
+            $output_audio_file_name = "{$guid}.mp3";
 
+            $words_list_resource = fopen($words_file_name, "w") or die("Unable to open file!");
+            $txt = "\n";
+            fwrite($words_list_resource, $user_input);
+            fclose($words_list_resource);
 
             // Execute AudioDictionary with live console output
 
             while (@ob_end_flush()); // end all output buffers if any
 
-            $proc = popen('/opt/audio-dictionary/AudioDictionary /tmp/audio-dictionary-words-list.txt', 'r');
-            
-            echo '<textarea readonly rows=5 cols=70 style="resize:none;">';
+            $proc = popen("/opt/audio-dictionary/AudioDictionary {$words_file_name} {$output_audio_file_name}", 'r');
+
+            echo '<div style="white-space: pre-line;overflow-y:scroll;height:250px;width:600px">';
             while (!feof($proc)) {
-                echo fread($proc, 4096);
+                echo fread($proc, 256);
                 @flush();
             }
+            echo '</div>';
 
-            echo '</textarea>';
+            shell_exec("ln -s /srv/audio-dictionary/{$output_audio_file_name} ./results/{$output_audio_file_name}");
 
             // Give a link to the result MP3
-            echo '<a class="button-success pure-button" href="result">Download MP3</a>';
+            echo "<a class='button-success pure-button' href='results/{$output_audio_file_name}'>Download MP3</a>";
 
             ?>
         </fieldset>
