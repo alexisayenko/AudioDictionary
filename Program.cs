@@ -51,7 +51,7 @@ namespace AudioDictionary
             Console.WriteLine();
             Console.WriteLine($"Done. {wordsList.Count(w => w.HasAudio)} words has been merged.");
 
-            Console.ReadKey();
+            // Console.ReadKey();
         }
 
         public static bool IsLinux
@@ -82,7 +82,7 @@ namespace AudioDictionary
         {
             var lines = new List<string>();
 
-            foreach(var word in wordsList)
+            foreach (var word in wordsList)
             {
                 if (!word.HasAudio)
                     continue;
@@ -120,7 +120,7 @@ namespace AudioDictionary
             var fullSilencePathFrom = Path.Combine(binPath, Silence05sec);
             var fullSilencePathTo = GetFullPath(Silence05sec);
             Console.WriteLine($"{fullSilencePathFrom} >> {fullSilencePathTo}");
-            File.Copy(fullSilencePathFrom, fullSilencePathTo);
+            File.Copy(fullSilencePathFrom, fullSilencePathTo, true);
         }
 
         private static string GetFullPath(string fileName)
@@ -153,12 +153,12 @@ namespace AudioDictionary
                 MergeFileWindows(Silence05sec, outputStream);
                 MergeFileWindows(fileName, outputStream);
                 MergeFileWindows(Silence05sec, outputStream);
-                         
+
                 MergeFileWindows(Silence05sec, outputStream);
                 MergeFileWindows(Silence05sec, outputStream);
             }
         }
-  
+
         private static void MergeFileWindows(string fileName, FileStream outputStream)
         {
             var reader = new Mp3FileReader(fileName);
@@ -224,14 +224,12 @@ namespace AudioDictionary
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "ffmpeg",
-                    Arguments = parameters,
+                    Arguments = $" -hide_banner -loglevel panic {parameters}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
-                    CreateNoWindow = true                    
+                    CreateNoWindow = true
                 }
             };
-
-            Console.WriteLine("!:>" + proc.StartInfo.Arguments);
 
             proc.Start();
             while (!proc.StandardOutput.EndOfStream)
