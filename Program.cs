@@ -110,8 +110,17 @@ namespace AudioDictionary
 
             Thread.Sleep(1000);
 
-            // ffmpeg -f concat -safe 0 -i mylist.txt -c copy output.wav
+            CopySilenceToWorkingDir();
             ExecuteFFMPEG($" -y -f concat -safe 0 -i {textFile} -c copy {outputFile}");
+        }
+
+        private static void CopySilenceToWorkingDir()
+        {
+            var binPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            var fullSilencePathFrom = Path.Combine(binPath, Silence05sec);
+            var fullSilencePathTo = GetFullPath(Silence05sec);
+            Console.WriteLine($"{fullSilencePathFrom} >> {fullSilencePathTo}");
+            File.Copy(fullSilencePathFrom, fullSilencePathTo);
         }
 
         private static string GetFullPath(string fileName)
