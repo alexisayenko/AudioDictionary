@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AudioDictionary
 {
-    class Word
+    class EnRuWord : IWord
     {
         public string English { get; set; }
         public string Russian { get; set; }
