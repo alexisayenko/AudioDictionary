@@ -8,12 +8,15 @@ using System.Text.RegularExpressions;
 
 namespace AudioDictionary
 {
-    abstract class Vocabulary
+    class Vocabulary
     {
         private readonly WebClient webClient = new WebClient();
 
-        protected abstract string[] Word1WikiBaseUrls { get; }
-        protected abstract string[] Word2WikiBaseUrls { get; }
+        public ILanguage Language1 { get; private set; }
+        public ILanguage Language2 { get; private set; }
+
+        //protected abstract string[] Word1WikiBaseUrls { get; }
+        //protected abstract string[] Word2WikiBaseUrls { get; }
 
         // public VocabularyType Type { get; private set; }
 
@@ -26,22 +29,28 @@ namespace AudioDictionary
         public string Silence05sec => Environment.SilenceFile;
         public WordPairList WordsList { get; set; }
 
-        public static Vocabulary Create(VocabularyType type)
+        public Vocabulary(ILanguage language1, ILanguage language2)
         {
-            switch (type)
-            {
-                case VocabularyType.EnRuTranslation:
-                    return new EnRuVocabulary();
-                case VocabularyType.DeRuTranslation:
-                    return new DeRuVocabulary();
-                case VocabularyType.DeSingularPlural:
-                    break;
-                default:
-                    break;
-            }
-
-            return null;
+            Language1 = language1;
+            Language2 = language2;
         }
+
+        //public static Vocabulary Create(VocabularyType type)
+        //{
+        //    switch (type)
+        //    {
+        //        case VocabularyType.EnRuTranslation:
+        //            return new EnRuVocabulary();
+        //        case VocabularyType.DeRuTranslation:
+        //            return new DeRuVocabulary();
+        //        case VocabularyType.DeSingularPlural:
+        //            break;
+        //        default:
+        //            break;
+        //    }
+
+        //    return null;
+        //}
 
         [Obsolete]
         private static void DownloadFiles(WordPairList wordsList, string outputFolder, Func<string, string> formUrlFunctor)
@@ -86,15 +95,15 @@ namespace AudioDictionary
                 //if (string.IsNullOrEmpty(urlOggEn))
                 //    Console.WriteLine("---> Not Found");
 
-                var urlOggEn = GetOggUrl(GetWord1SpecificDcitionaryUrl, Word1WikiBaseUrls, pair.Word1);
+                var urlOggWord1 = GetOggUrl(Language1.GetLanguageSpecificDcitionaryUrl, Language1.WikiBaseUrls, pair.Word1);
 
                 // Then download Ru word from En and Ru wiki
                 //var urlOggRu = GetWikiUrl(Word1WikiBaseUrl, pair.Word2);
                 //if (string.IsNullOrEmpty(urlOggRu))
                 //    urlOggRu = GetWikiUrl(Word2WikiBaseUrl, pair.Word2);
-                var urlOggRu = GetOggUrl(GetWord2SpecificDcitionaryUrl, Word2WikiBaseUrls, pair.Word2);
+                var urlOggWord2 = GetOggUrl(Language2.GetLanguageSpecificDcitionaryUrl, Language2.WikiBaseUrls, pair.Word2);
 
-                if (string.IsNullOrEmpty(urlOggRu) || string.IsNullOrEmpty(urlOggEn))
+                if (string.IsNullOrEmpty(urlOggWord2) || string.IsNullOrEmpty(urlOggWord1))
                 {
                     Console.WriteLine($"{counter}/{total} [!] Skipping words pair '{pair.Word1}'='{pair.Word2}' due to missing audio files");
                     continue;
@@ -102,8 +111,8 @@ namespace AudioDictionary
 
                 Console.WriteLine($"{counter}/{total} Downloading words pair '{pair.Word1}'='{pair.Word2}'");
 
-                webClient.DownloadFile(urlOggEn, Path.Combine(WorkingDirectory, $"{pair.Word1}.ogg"));
-                webClient.DownloadFile(urlOggRu, Path.Combine(WorkingDirectory, $"{pair.Word2}.ogg"));
+                webClient.DownloadFile(urlOggWord1, Path.Combine(WorkingDirectory, $"{pair.Word1}.ogg"));
+                webClient.DownloadFile(urlOggWord2, Path.Combine(WorkingDirectory, $"{pair.Word2}.ogg"));
                 pair.HasAudio = true;
             }
         }
@@ -115,13 +124,13 @@ namespace AudioDictionary
         /// <param name="wikiBaseUrls"></param>
         /// <param name="word"></param>
         /// <returns></returns>
-        private string GetOggUrl(Func<string,string> wordSpecificDictionaryFunctor, string[] wikiBaseUrls, string word)
+        private string GetOggUrl(Func<string, string> wordSpecificDictionaryFunctor, string[] wikiBaseUrls, string word)
         {
             var urlOgg = wordSpecificDictionaryFunctor(word);
             if (!string.IsNullOrEmpty(urlOgg))
                 return urlOgg;
 
-            foreach(var wikiBaseUrl in wikiBaseUrls)
+            foreach (var wikiBaseUrl in wikiBaseUrls)
             {
                 urlOgg = GetWikiUrl(wikiBaseUrl, word);
                 if (!string.IsNullOrEmpty(urlOgg))
@@ -188,7 +197,7 @@ namespace AudioDictionary
         /// </summary>
         /// <param name="word"></param>
         /// <returns></returns>
-        protected abstract string GetWord1SpecificDcitionaryUrl(string word);
+//        protected abstract string GetWord1SpecificDcitionaryUrl(string word);
 
         /// <summary>
         /// Use this method to get URL of online dictionary specifc to Word2.
@@ -197,7 +206,7 @@ namespace AudioDictionary
         /// </summary>
         /// <param name="word"></param>
         /// <returns></returns>
-        protected abstract string GetWord2SpecificDcitionaryUrl(string word);
+//        protected abstract string GetWord2SpecificDcitionaryUrl(string word);
 
         internal virtual void GenerateAudioFile()
         {
