@@ -10,5 +10,6 @@ namespace AudioDictionary
         public string SingularForm { get; set; }
         public string PluralArticle { get; set; }
         public string PluralForm { get; set; }
+        public bool HasAudio { get; set; }
     }
 }

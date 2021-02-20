@@ -98,7 +98,7 @@ namespace AudioDictionary
 
         private void EncodeToMp3(string fileName)
         {
-            if (EnvironmentTool.IsLinux)
+            if (Environment.IsLinux)
                 EncodeToMp3Linux(fileName);
             else
                 EncodeToMp3Windows(fileName);
@@ -235,7 +235,7 @@ namespace AudioDictionary
 
         public void MergeFiles(EnRuWordsList wordsList, string outputFile)
         {
-            if (EnvironmentTool.IsLinux)
+            if (Environment.IsLinux)
                 MergeFilesLinux(wordsList, outputFile);
             else
                 MergeFilesWindows(wordsList, outputFile);

@@ -33,3 +33,11 @@ TODO:
 - if _us_1 does not exist, try _us_2 autuomatically
 + restrict max lines
 + amend deploy script to deploy also the website
+- add support german russian dicitonary
+- add support for german articles in front
+- add support for german single-plural dictionary
+- auto increment release/build number and display somewhere in php page.
+- add support for multiple meanings (объект, предмет, вещь = der Gegenstand)
+- user shuld be able choose way of dictionary (en->ru, ru->en, de->ru, etc)
+- add images, styles of page
+- add audiopattern to generate vocabulary: Ru.Pause.Pause.En.En.En.En.En.Pause.Pause.Pause

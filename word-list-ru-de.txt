@@ -1,0 +1,16 @@
+﻿древесина	=	das Holz
+бумага	=	das Papier
+угловатый	=	eckig
+угол	=	die Ecke
+круглый	=	rund
+пластик	=	der Kunststoff
+предмет	=	der Gegenstand
+вещь	=	die Sache
+зажигалка	=	das Feuerzeug
+карандаш	=	der Bleistift
+стих	=	das Gedicht
+заказ	=	die Bestellung
+заказывать	=	bestellen
+количество	=	die Menge
+сведения	=	die Angaben
+отсутствовать	=	fehlen

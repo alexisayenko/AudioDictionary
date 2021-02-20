@@ -1,30 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AudioDictionary
 {
-    class EnRuVocabulary
+    class EnRuVocabulary : Vocabulary
     {
         private const string UlrEnBase = "https://www.oxfordlearnersdictionaries.com/us/media/english/us_pron_ogg";
         private const string UrlEnPostfix = "__us_1.ogg";
         private const string UrlWikiBaseOgg = "https://upload.wikimedia.org/wikipedia/commons";
         private const string UrlRuWikiBaseHtml = "https://ru.wiktionary.org/wiki";
         private const string UrlEnWikiBaseHtml = "https://en.wiktionary.org/wiki";
-
-        public EnRuVocabulary(EnRuWordsList wordsList, string workingDirectory, string pauseFileName)
+        
+        public EnRuVocabulary(string silence05sec) 
         {
-            WordsList = wordsList;
-            WorkingDirectory = workingDirectory;
-            PauseFileName = pauseFileName;
+            Silence05sec = silence05sec;
         }
 
         public EnRuWordsList WordsList { get; set; }
-        public string WorkingDirectory { get; }
-        public string PauseFileName { get; }
 
         [Obsolete]
         private static void DownloadFiles(EnRuWordsList wordsList, string outputFolder, Func<string, string> formUrlFunctor)
@@ -141,5 +138,54 @@ namespace AudioDictionary
             return result;
         }
 
+        private static EnRuWordsList ReadFilesListToDownload(string fileName)
+        {
+            var result = new EnRuWordsList();
+
+            var content = File.ReadAllLines(fileName);
+
+            foreach (string line in content)
+            {
+                string[] keyvalue = line.Split('=');
+                if (keyvalue.Length == 2)
+                {
+                    var word = new EnRuWord();
+                    word.English = keyvalue[0].Trim();
+                    word.Russian = keyvalue[1].Trim();
+
+                    result.Add(word);
+                }
+            }
+
+            return result;
+        }
+
+        internal override void GenerateAudioFile()
+        {
+            var audioTool = new AudioTool(WorkingDirectory, Silence05sec);
+
+            // 1. Get list of files to download
+            var wordsList = ReadFilesListToDownload(Environment.WordsFile);
+
+            // 2. Download files
+            DownloadAudio(wordsList);
+
+            // 3. Convert .ogg to .mp3 files
+            Console.WriteLine();
+            Console.WriteLine("Converting donwloaded OGG files to MP3");
+            audioTool.ConvertDownloadedAudio(wordsList);
+
+            // 4. Normalize .mp3 files
+            audioTool.NormalizeAudio(wordsList);
+
+            // 5. Merge all files into one result mp3
+            Console.WriteLine();
+            Console.WriteLine("Merging all files into one result MP3");
+            audioTool.MergeFiles(wordsList, Path.Combine(WorkingDirectory, Environment.OutputResultMp3));
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine($"Done. {wordsList.Count(w => w.HasAudio)} words has been merged.");
+        }
     }
 }

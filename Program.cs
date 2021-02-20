@@ -15,77 +15,44 @@ namespace AudioDictionary
 {
     class Program
     {
-
-        private static readonly string WorkingDirectory;
         private const string Silence05sec = "silence-0.5s.mp3";
+        private static VocabularyType vocabularyType;
 
-        static Program()
+        private static void InitializeVariables(string[] args)
         {
-            WorkingDirectory = EnvironmentTool.IsLinux ? @"/srv/audio-dictionary" : @"C:\Temp\AudioDictionary";
+            Console.OutputEncoding = Encoding.UTF8;
 
+            if (Environment.IsLinux == false)
+                MediaFoundationInterop.MFStartup(0);
+
+            Environment.WordsFile = args.Length > 0 ? args[0] : @"/tmp/words-list.txt";
+            Environment.OutputResultMp3 = args.Length > 1 ? args[1] : "!result.mp3";
+            vocabularyType = args.Length > 2 ? ParseVocabularyType(args[2]) : default;
+        }
+
+        private static VocabularyType ParseVocabularyType(string vocabulartyType)
+        {
+            var stringToVocabularyTypeDictionary = new Dictionary<string, VocabularyType>();
+            stringToVocabularyTypeDictionary.Add("EnRu", VocabularyType.EnRuTranslation);
+            stringToVocabularyTypeDictionary.Add("RuEn", VocabularyType.RuEnTranslation);
+            stringToVocabularyTypeDictionary.Add("RuDe", VocabularyType.RuDeTranslation);
+
+            if (stringToVocabularyTypeDictionary.TryGetValue(vocabulartyType, out VocabularyType result))
+                return result;
+
+            return default;
         }
 
         static void Main(string[] args)
         {
-            Console.OutputEncoding = Encoding.UTF8;
+            InitializeVariables(args);
 
-            if (EnvironmentTool.IsLinux == false)
-                MediaFoundationInterop.MFStartup(0);
+            Console.WriteLine($"Reading words list from {Environment.WordsFile}");
 
-            var wordsFile = args.Length > 0 ? args[0] : @"/tmp/words-list.txt";
-            var outputResultMp3 = args.Length > 1 ? args[1] : "!result.mp3";
+            var vocabulary = 
+                Vocabulary.Create(vocabularyType, Silence05sec);
 
-            Console.WriteLine($"Reading words list from {wordsFile}");
-
-            // 1. Get list of files to download
-            var wordsList = ReadFilesListToDownload(wordsFile);
-
-            var enRuVocabulary = new EnRuVocabulary(wordsList, WorkingDirectory, Silence05sec);
-
-            // 2. Download files
-            enRuVocabulary.DownloadAudio(wordsList);
-
-            var audioTool = new AudioTool(WorkingDirectory, Silence05sec);
-
-            // 3. Convert .ogg to .mp3 files
-            Console.WriteLine();
-            Console.WriteLine("Converting donwloaded OGG files to MP3");
-            audioTool.ConvertDownloadedAudio(wordsList);
-
-            // 4. Normalize .mp3 files
-            audioTool.NormalizeAudio(wordsList);
-
-            // 5. Merge all files into one result mp3
-            Console.WriteLine();
-            Console.WriteLine("Merging all files into one result MP3");
-            audioTool.MergeFiles(wordsList, Path.Combine(WorkingDirectory, outputResultMp3));
-
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine($"Done. {wordsList.Count(w => w.HasAudio)} words has been merged.");
+            vocabulary.GenerateAudioFile();
         }
-        
-        private static EnRuWordsList ReadFilesListToDownload(string fileName)
-        {
-            var result = new EnRuWordsList();
-
-            var content = File.ReadAllLines(fileName);
-
-            foreach (string line in content)
-            {
-                string[] keyvalue = line.Split('=');
-                if (keyvalue.Length == 2)
-                {
-                    var word = new EnRuWord();
-                    word.English = keyvalue[0].Trim();
-                    word.Russian = keyvalue[1].Trim();
-
-                    result.Add(word);
-                }
-            }
-
-            return result;
-        }
-
     }
 }
