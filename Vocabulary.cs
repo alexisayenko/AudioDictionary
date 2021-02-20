@@ -12,8 +12,8 @@ namespace AudioDictionary
     {
         private readonly WebClient webClient = new WebClient();
 
-        protected virtual string[] Word1WikiBaseUrls { get; }
-        protected virtual string[] Word2WikiBaseUrls { get; }
+        protected abstract string[] Word1WikiBaseUrls { get; }
+        protected abstract string[] Word2WikiBaseUrls { get; }
 
         // public VocabularyType Type { get; private set; }
 
@@ -33,7 +33,7 @@ namespace AudioDictionary
                 case VocabularyType.EnRuTranslation:
                     return new EnRuVocabulary();
                 case VocabularyType.DeRuTranslation:
-                    break;
+                    return new DeRuVocabulary();
                 case VocabularyType.DeSingularPlural:
                     break;
                 default:
