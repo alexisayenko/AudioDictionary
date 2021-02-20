@@ -21,27 +21,27 @@ namespace AudioDictionary
             Silence05sec = silence05sec;
         }
 
-        public EnRuWordsList WordsList { get; set; }
+        public WordPairList WordsList { get; set; }
 
         [Obsolete]
-        private static void DownloadFiles(EnRuWordsList wordsList, string outputFolder, Func<string, string> formUrlFunctor)
+        private static void DownloadFiles(WordPairList wordsList, string outputFolder, Func<string, string> formUrlFunctor)
         {
             WebClient webClient = new WebClient();
 
             foreach (var word in wordsList)
             {
-                var outputFile = $"{outputFolder}/{word.English}.ogg";
+                var outputFile = $"{outputFolder}/{word.Word1}.ogg";
 
                 if (File.Exists(outputFile))
                     continue;
 
-                var downloadUrl = formUrlFunctor(word.English);
+                var downloadUrl = formUrlFunctor(word.Word1);
 
                 webClient.DownloadFile(downloadUrl, outputFile);
             }
         }
 
-        public void DownloadAudio(EnRuWordsList wordsList)
+        public void DownloadAudio(WordPairList wordsList)
         {
             WebClient webClient = new WebClient();
 
@@ -53,8 +53,8 @@ namespace AudioDictionary
                 counter++;
 
                 // Check if file exists
-                var wordEn = word.English;
-                var wordRu = word.Russian;
+                var wordEn = word.Word1;
+                var wordRu = word.Word2;
 
                 if (File.Exists(Path.Combine(WorkingDirectory, $"{wordEn}.ogg")) &&
                     File.Exists(Path.Combine(WorkingDirectory, $"{wordRu}.ogg")))
@@ -138,9 +138,9 @@ namespace AudioDictionary
             return result;
         }
 
-        private static EnRuWordsList ReadFilesListToDownload(string fileName)
+        private static WordPairList ReadFilesListToDownload(string fileName)
         {
-            var result = new EnRuWordsList();
+            var result = new WordPairList();
 
             var content = File.ReadAllLines(fileName);
 
@@ -149,9 +149,9 @@ namespace AudioDictionary
                 string[] keyvalue = line.Split('=');
                 if (keyvalue.Length == 2)
                 {
-                    var word = new EnRuWord();
-                    word.English = keyvalue[0].Trim();
-                    word.Russian = keyvalue[1].Trim();
+                    var word = new WordPair();
+                    word.Word1 = keyvalue[0].Trim();
+                    word.Word2 = keyvalue[1].Trim();
 
                     result.Add(word);
                 }

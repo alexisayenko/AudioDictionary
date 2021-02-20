@@ -20,20 +20,20 @@ namespace AudioDictionary
             Silence05sec = silence05sec;
         }
 
-        public void ConvertDownloadedAudio(EnRuWordsList wordsList)
+        public void ConvertDownloadedAudio(WordPairList wordsList)
         {
             foreach (var word in wordsList)
             {
                 if (!word.HasAudio)
                     continue;
 
-                word.HasAudio = ConvertOggToMp3(Path.Combine(WorkingDirectory, $"{word.English}.ogg"));
-                word.HasAudio &= ConvertOggToMp3(Path.Combine(WorkingDirectory, $"{word.Russian}.ogg"));
+                word.HasAudio = ConvertOggToMp3(Path.Combine(WorkingDirectory, $"{word.Word1}.ogg"));
+                word.HasAudio &= ConvertOggToMp3(Path.Combine(WorkingDirectory, $"{word.Word2}.ogg"));
             }
         }
 
 
-        private void MergeFilesWindows(EnRuWordsList wordsList, string outputFile)
+        private void MergeFilesWindows(WordPairList wordsList, string outputFile)
         {
             var outputStream = new FileStream(Path.Combine(WorkingDirectory, outputFile), FileMode.Create);
 
@@ -42,12 +42,12 @@ namespace AudioDictionary
                 if (!word.HasAudio)
                     continue;
 
-                var fileName = Path.Combine(WorkingDirectory, $"{word.Russian}.mp3");
+                var fileName = Path.Combine(WorkingDirectory, $"{word.Word2}.mp3");
                 MergeFileWindows(fileName, outputStream);
                 MergeFileWindows(Silence05sec, outputStream);
                 MergeFileWindows(Silence05sec, outputStream);
 
-                fileName = Path.Combine(WorkingDirectory, $"{word.English}.mp3");
+                fileName = Path.Combine(WorkingDirectory, $"{word.Word1}.mp3");
                 MergeFileWindows(fileName, outputStream);
                 MergeFileWindows(Silence05sec, outputStream);
                 MergeFileWindows(fileName, outputStream);
@@ -188,7 +188,7 @@ namespace AudioDictionary
             }
         }
 
-        private void MergeFilesLinux(EnRuWordsList wordsList, string outputFile)
+        private void MergeFilesLinux(WordPairList wordsList, string outputFile)
         {
             var lines = new List<string>();
 
@@ -197,18 +197,18 @@ namespace AudioDictionary
                 if (!word.HasAudio)
                     continue;
 
-                lines.Add($"file '{GetFullPath(word.Russian)}.mp3'");
+                lines.Add($"file '{GetFullPath(word.Word2)}.mp3'");
                 lines.Add($"file '{GetFullPath(Silence05sec)}'");
                 lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
                 lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
                 lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
                 lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
                 lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.English)}.mp3'");
+                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
                 lines.Add($"file '{GetFullPath(Silence05sec)}'");
                 lines.Add($"file '{GetFullPath(Silence05sec)}'");
                 lines.Add($"file '{GetFullPath(Silence05sec)}'");
@@ -233,7 +233,7 @@ namespace AudioDictionary
             File.Copy(fullSilencePathFrom, fullSilencePathTo, true);
         }
 
-        public void MergeFiles(EnRuWordsList wordsList, string outputFile)
+        public void MergeFiles(WordPairList wordsList, string outputFile)
         {
             if (Environment.IsLinux)
                 MergeFilesLinux(wordsList, outputFile);
@@ -246,7 +246,7 @@ namespace AudioDictionary
             return Path.Combine(WorkingDirectory, fileName);
         }
 
-        public void NormalizeAudio(EnRuWordsList wordsList)
+        public void NormalizeAudio(WordPairList wordsList)
         {
             // Trim empy sound
             // Normalize Volume

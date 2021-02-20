@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AudioDictionary
 {
-    class EnRuWordsList:List<EnRuWord>
+    class WordPairList : List<WordPair>
     {
     }
 }
