@@ -22,4 +22,6 @@ ssh alex-ocean chmod a+x /opt/audio-dictionary/AudioDictionary
 
 scp /mnt/c/Alex/AudioDictionary/audio-dictionary-generator.php alex-ocean:/var/www/html/
 
+ssh alex-ocean "sed -i \"s/datetimeplaceholder/`date +'%H:%M %d.%m.%Y'`/g\" /var/www/html/audio-dictionary-generator.php"
+
 show-message "done"

@@ -20,6 +20,8 @@
         return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
     } ?>
 
+    <p>Release date time: datetimeplaceholder</p>
+
     <form class="pure-form-stacked" method="post" action="audio-dictionary-generator.php">
         <fieldset>
             <textarea maxlength="1000" style="resize:none;" rows="15" cols="70" name="user_input"></textarea>
