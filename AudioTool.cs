@@ -211,18 +211,8 @@ namespace AudioDictionary
 
             Thread.Sleep(1000);
 
-            //            CopySilenceToWorkingDir();
             ExecuteFFMPEG($" -y -f concat -safe 0 -i {textFile} -c copy {Environment.WorkingPathToResultMp3}");
         }
-
-        //private void CopySilenceToWorkingDir()
-        //{
-        //    var binPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        //    var fullSilencePathFrom = Path.Combine(binPath, Silence05sec);
-        //    var fullSilencePathTo = Environment.GetWorkingPathToFile(Silence05sec);
-
-        //    File.Copy(fullSilencePathFrom, fullSilencePathTo, true);
-        //}
 
         public void MergeFiles(WordPairList wordsList)
         {
