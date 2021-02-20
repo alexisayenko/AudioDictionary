@@ -6,10 +6,8 @@ namespace AudioDictionary
 {
     enum VocabularyType
     {
-        RuEnTranslation,
         EnRuTranslation,
         DeRuTranslation,
-        RuDeTranslation,
         DeSingularPlural
     }
 }

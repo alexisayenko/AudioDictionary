@@ -32,7 +32,6 @@ namespace AudioDictionary
             }
         }
 
-
         private void MergeFilesWindows(WordPairList wordsList, string outputFile)
         {
             var outputStream = new FileStream(Path.Combine(WorkingDirectory, outputFile), FileMode.Create);

@@ -15,7 +15,6 @@ namespace AudioDictionary
 {
     class Program
     {
-        private const string Silence05sec = "silence-0.5s.mp3";
         private static VocabularyType vocabularyType;
 
         private static void InitializeVariables(string[] args)
@@ -25,6 +24,7 @@ namespace AudioDictionary
             if (Environment.IsLinux == false)
                 MediaFoundationInterop.MFStartup(0);
 
+            Environment.SilenceFile = "silence-0.5s.mp3";
             Environment.WordsFile = args.Length > 0 ? args[0] : @"/tmp/words-list.txt";
             Environment.OutputResultMp3 = args.Length > 1 ? args[1] : "!result.mp3";
             vocabularyType = args.Length > 2 ? ParseVocabularyType(args[2]) : default;
@@ -32,10 +32,11 @@ namespace AudioDictionary
 
         private static VocabularyType ParseVocabularyType(string vocabulartyType)
         {
-            var stringToVocabularyTypeDictionary = new Dictionary<string, VocabularyType>();
-            stringToVocabularyTypeDictionary.Add("EnRu", VocabularyType.EnRuTranslation);
-            stringToVocabularyTypeDictionary.Add("RuEn", VocabularyType.RuEnTranslation);
-            stringToVocabularyTypeDictionary.Add("RuDe", VocabularyType.RuDeTranslation);
+            var stringToVocabularyTypeDictionary = new Dictionary<string, VocabularyType>
+            {
+                { "EnRu", VocabularyType.EnRuTranslation },
+                { "DeRu", VocabularyType.DeRuTranslation }
+            };
 
             if (stringToVocabularyTypeDictionary.TryGetValue(vocabulartyType, out VocabularyType result))
                 return result;
@@ -50,7 +51,7 @@ namespace AudioDictionary
             Console.WriteLine($"Reading words list from {Environment.WordsFile}");
 
             var vocabulary = 
-                Vocabulary.Create(vocabularyType, Silence05sec);
+                Vocabulary.Create(vocabularyType);
 
             vocabulary.GenerateAudioFile();
         }

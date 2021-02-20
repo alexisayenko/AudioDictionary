@@ -19,5 +19,6 @@ namespace AudioDictionary
 
         public static string WordsFile { get; internal set; }
         public static string OutputResultMp3 { get; internal set; }
+        public static string SilenceFile { get; internal set; }
     }
 }
