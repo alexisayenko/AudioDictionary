@@ -6,11 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove=".gitignore" />
+    <None Remove="C:\Users\alex.isayenko\.nuget\packages\naudio.vorbis\1.2.0\contentFiles\any\netstandard2.0\LICENSE" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="NAudio.Vorbis" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="silence-0.5s.mp3">
+    <None Update="Files\silence-0.5s.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

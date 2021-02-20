@@ -5,22 +5,20 @@ show-message(){
 }
 
 CONFIGURATION=Release
-
-if [ $# == 1 ]
-then
-	CONFIGURATION=$1
-fi;
+# RUNTIME="debian.10-x64"
+RUNTIME="ubuntu.20.04-x64"
+FRAMEWORK=net5.0
 
 show-message "publishing"
 cd /mnt/c/Alex/AudioDictionary/
-show-message "dotnet publish -c $CONFIGURATION -r debian.10-x64 --self-contained"
-dotnet publish -c $CONFIGURATION -r debian.10-x64 --self-contained
+show-message "dotnet publish -c $CONFIGURATION -f $FRAMEWORK -r $RUNTIME --self-contained"
+dotnet publish -c $CONFIGURATION -f $FRAMEWORK -r $RUNTIME --self-contained
 
 show-message "copy files"
 # cp ./bin/Release/netcoreapp3.1/debian.10-x64/publish/* ~/audio-dictionary/
 # chmod a+x ~/audio-dictionary/AudioDictionary
-cd ./bin/$CONFIGURATION/net5.0/debian.10-x64/publish/
-tar -cJf audio-dictionary.tar.xz . 
+cd ./bin/$CONFIGURATION/$FRAMEWORK/$RUNTIME/publish/
+tar -cJf audio-dictionary.tar.xz .
 scp audio-dictionary.tar.xz alex-ocean:/tmp/
 
 show-message "clean up remote directory and unarchive binaries"
