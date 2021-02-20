@@ -7,8 +7,6 @@ namespace AudioDictionary
 {
     class Program
     {
-        //private static VocabularyType vocabularyType;
-
         private static void InitializeVariables(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;

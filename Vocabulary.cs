@@ -15,16 +15,6 @@ namespace AudioDictionary
         public ILanguage Language1 { get; private set; }
         public ILanguage Language2 { get; private set; }
 
-        //protected abstract string[] Word1WikiBaseUrls { get; }
-        //protected abstract string[] Word2WikiBaseUrls { get; }
-
-        // public VocabularyType Type { get; private set; }
-
-        //public Vocabulary(VocabularyType type)
-        //{
-        //    this.Type = type;
-        //}
-
         public string WorkingDirectory => Environment.WorkingDirectory;
         public string Silence05sec => Environment.SilenceFile;
         public WordPairList WordsList { get; set; }
@@ -34,23 +24,6 @@ namespace AudioDictionary
             Language1 = language1;
             Language2 = language2;
         }
-
-        //public static Vocabulary Create(VocabularyType type)
-        //{
-        //    switch (type)
-        //    {
-        //        case VocabularyType.EnRuTranslation:
-        //            return new EnRuVocabulary();
-        //        case VocabularyType.DeRuTranslation:
-        //            return new DeRuVocabulary();
-        //        case VocabularyType.DeSingularPlural:
-        //            break;
-        //        default:
-        //            break;
-        //    }
-
-        //    return null;
-        //}
 
         [Obsolete]
         private static void DownloadFiles(WordPairList wordsList, string outputFolder, Func<string, string> formUrlFunctor)
@@ -88,21 +61,13 @@ namespace AudioDictionary
                     continue;
                 }
 
-                //var urlOggEn = GetWord1SpecificDcitionaryUrl(pair.Word1);
-                //if (string.IsNullOrEmpty(urlOggEn))
-                //    urlOggEn = GetWikiUrl(Word1WikiBaseUrl, pair.Word1);
-
-                //if (string.IsNullOrEmpty(urlOggEn))
-                //    Console.WriteLine("---> Not Found");
-
+                // Dowload audio for word1
                 var urlOggWord1 = GetOggUrl(Language1.GetLanguageSpecificDcitionaryUrl, Language1.WikiBaseUrls, pair.Word1);
 
-                // Then download Ru word from En and Ru wiki
-                //var urlOggRu = GetWikiUrl(Word1WikiBaseUrl, pair.Word2);
-                //if (string.IsNullOrEmpty(urlOggRu))
-                //    urlOggRu = GetWikiUrl(Word2WikiBaseUrl, pair.Word2);
+                // Dowload audio for word2
                 var urlOggWord2 = GetOggUrl(Language2.GetLanguageSpecificDcitionaryUrl, Language2.WikiBaseUrls, pair.Word2);
 
+                // Check if audio was downloaded for both words1 and word2
                 if (string.IsNullOrEmpty(urlOggWord2) || string.IsNullOrEmpty(urlOggWord1))
                 {
                     Console.WriteLine($"{counter}/{total} [!] Skipping words pair '{pair.Word1}'='{pair.Word2}' due to missing audio files");
@@ -162,7 +127,7 @@ namespace AudioDictionary
             }
             catch (Exception)
             {
-                // Ignore exceptions
+                //// Ignore exceptions
             }
 
             return urlOgg;
@@ -189,24 +154,6 @@ namespace AudioDictionary
 
             return result;
         }
-
-        /// <summary>
-        /// Use this method to get URL of online dictionary specifc to Word1.
-        /// You should use the dictionary that suits the language of the word better than wikitionary. 
-        /// For example, Oxford dictionary for English words.
-        /// </summary>
-        /// <param name="word"></param>
-        /// <returns></returns>
-//        protected abstract string GetWord1SpecificDcitionaryUrl(string word);
-
-        /// <summary>
-        /// Use this method to get URL of online dictionary specifc to Word2.
-        /// You should use the dictionary that suits the language of the word better than wikitionary. 
-        /// For example, Oxford dictionary for English words.  
-        /// </summary>
-        /// <param name="word"></param>
-        /// <returns></returns>
-//        protected abstract string GetWord2SpecificDcitionaryUrl(string word);
 
         internal virtual void GenerateAudioFile()
         {

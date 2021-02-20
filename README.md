@@ -14,6 +14,8 @@ Release/Deploy
 -------
 Simply run the script 'deploy-audio-dictionary.sh' to automatically build and deploy the self-contained binaries to alex-ocean server.
 
+For more info refer to https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
+Supported RID https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 
 Setup Linux Environment
 -----------------------
