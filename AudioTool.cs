@@ -11,14 +11,7 @@ namespace AudioDictionary
 {
     class AudioTool
     {
-        public string WorkingDirectory { get; private set; }
-        public string Silence05sec { get; }
-
-        public AudioTool(string workingDirectory, string silence05sec) 
-        {
-            WorkingDirectory = workingDirectory;
-            Silence05sec = silence05sec;
-        }
+        public string Silence05sec => Environment.WorkingPathToSilenceFile;
 
         public void ConvertDownloadedAudio(WordPairList wordsList)
         {
@@ -27,26 +20,26 @@ namespace AudioDictionary
                 if (!word.HasAudio)
                     continue;
 
-                word.HasAudio = ConvertOggToMp3(Path.Combine(WorkingDirectory, $"{word.Word1}.ogg"));
-                word.HasAudio &= ConvertOggToMp3(Path.Combine(WorkingDirectory, $"{word.Word2}.ogg"));
+                word.HasAudio = ConvertOggToMp3(Environment.GetWorkingPathToOgg(word.Word1));
+                word.HasAudio &= ConvertOggToMp3(Environment.GetWorkingPathToOgg(word.Word2));
             }
         }
 
-        private void MergeFilesWindows(WordPairList wordsList, string outputFile)
+        private void MergeFilesWindows(WordPairList wordsList)
         {
-            var outputStream = new FileStream(Path.Combine(WorkingDirectory, outputFile), FileMode.Create);
+            var outputStream = new FileStream(Environment.WorkingPathToResultMp3, FileMode.Create);
 
             foreach (var word in wordsList)
             {
                 if (!word.HasAudio)
                     continue;
 
-                var fileName = Path.Combine(WorkingDirectory, $"{word.Word2}.mp3");
+                var fileName = Environment.GetWorkingPathToMp3(word.Word2);
                 MergeFileWindows(fileName, outputStream);
                 MergeFileWindows(Silence05sec, outputStream);
                 MergeFileWindows(Silence05sec, outputStream);
 
-                fileName = Path.Combine(WorkingDirectory, $"{word.Word1}.mp3");
+                fileName = Environment.GetWorkingPathToMp3(word.Word1);
                 MergeFileWindows(fileName, outputStream);
                 MergeFileWindows(Silence05sec, outputStream);
                 MergeFileWindows(fileName, outputStream);
@@ -133,12 +126,11 @@ namespace AudioDictionary
 
         private void EncodeToMp3Linux(string filename)
         {
-            var outputFile = Path.Combine(WorkingDirectory, Path.GetFileNameWithoutExtension(filename) + ".mp3");
+            var outputFile = Environment.GetWorkingPathToMp3(Path.GetFileNameWithoutExtension(filename));
             var parameters = $" -i {filename} -vn -n -ar 44100 -ac 2 -b:a 128k {outputFile}";
 
             ExecuteFFMPEG(parameters);
         }
-
 
         static void MergeOgg(string[] inputFiles, string outputFile)
         {
@@ -187,7 +179,7 @@ namespace AudioDictionary
             }
         }
 
-        private void MergeFilesLinux(WordPairList wordsList, string outputFile)
+        private void MergeFilesLinux(WordPairList wordsList)
         {
             var lines = new List<string>();
 
@@ -196,53 +188,48 @@ namespace AudioDictionary
                 if (!word.HasAudio)
                     continue;
 
-                lines.Add($"file '{GetFullPath(word.Word2)}.mp3'");
-                lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
-                lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
-                lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
-                lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
-                lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(word.Word1)}.mp3'");
-                lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(Silence05sec)}'");
-                lines.Add($"file '{GetFullPath(Silence05sec)}'");
+                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word2)}.mp3'");
+                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
+                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
+                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
+                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
+                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
+                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
             }
 
-            var textFile = Path.Combine(WorkingDirectory, "mylist.txt");
+            var textFile = Environment.GetWorkingPathToFile("mylist.txt");
 
             File.WriteAllLines(textFile, lines);
 
             Thread.Sleep(1000);
 
-            CopySilenceToWorkingDir();
-            ExecuteFFMPEG($" -y -f concat -safe 0 -i {textFile} -c copy {outputFile}");
+            //            CopySilenceToWorkingDir();
+            ExecuteFFMPEG($" -y -f concat -safe 0 -i {textFile} -c copy {Environment.WorkingPathToResultMp3}");
         }
 
-        private void CopySilenceToWorkingDir()
-        {
-            var binPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            var fullSilencePathFrom = Path.Combine(binPath, Silence05sec);
-            var fullSilencePathTo = GetFullPath(Silence05sec);
+        //private void CopySilenceToWorkingDir()
+        //{
+        //    var binPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+        //    var fullSilencePathFrom = Path.Combine(binPath, Silence05sec);
+        //    var fullSilencePathTo = Environment.GetWorkingPathToFile(Silence05sec);
 
-            File.Copy(fullSilencePathFrom, fullSilencePathTo, true);
-        }
+        //    File.Copy(fullSilencePathFrom, fullSilencePathTo, true);
+        //}
 
-        public void MergeFiles(WordPairList wordsList, string outputFile)
+        public void MergeFiles(WordPairList wordsList)
         {
             if (Environment.IsLinux)
-                MergeFilesLinux(wordsList, outputFile);
+                MergeFilesLinux(wordsList);
             else
-                MergeFilesWindows(wordsList, outputFile);
-        }
-
-        private string GetFullPath(string fileName)
-        {
-            return Path.Combine(WorkingDirectory, fileName);
+                MergeFilesWindows(wordsList);
         }
 
         public void NormalizeAudio(WordPairList wordsList)

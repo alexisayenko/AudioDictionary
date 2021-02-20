@@ -1,6 +1,7 @@
 ﻿using NAudio.MediaFoundation;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace AudioDictionary
@@ -14,9 +15,9 @@ namespace AudioDictionary
             if (Environment.IsLinux == false)
                 MediaFoundationInterop.MFStartup(0);
 
-            Environment.SilenceFile = "silence-0.5s.mp3";
+            Environment.SetSilenceFile(Path.Combine("Files", "silence-0.5s.mp3"));
             Environment.WordsFile = args.Length > 0 ? args[0] : @"/tmp/words-list.txt";
-            Environment.OutputResultMp3 = args.Length > 1 ? args[1] : "!result.mp3";
+            Environment.SetOutputResultMp3(args.Length > 1 ? args[1] : "!result.mp3");
         }
 
         /// <summary>

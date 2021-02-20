@@ -15,8 +15,7 @@ namespace AudioDictionary
         public ILanguage Language1 { get; private set; }
         public ILanguage Language2 { get; private set; }
 
-        public string WorkingDirectory => Environment.WorkingDirectory;
-        public string Silence05sec => Environment.SilenceFile;
+        public string Silence05sec => Environment.WorkingPathToSilenceFile;
         public WordPairList WordsList { get; set; }
 
         public Vocabulary(ILanguage language1, ILanguage language2)
@@ -53,8 +52,8 @@ namespace AudioDictionary
                 counter++;
 
                 // Check if file exists
-                if (File.Exists(Path.Combine(WorkingDirectory, $"{pair.Word1}.ogg")) &&
-                    File.Exists(Path.Combine(WorkingDirectory, $"{pair.Word2}.ogg")))
+                if (File.Exists(Environment.GetWorkingPathToOgg(pair.Word1)) &&
+                    File.Exists(Environment.GetWorkingPathToOgg(pair.Word2)))
                 {
                     Console.WriteLine($"{counter}/{total} Skipping words pair '{pair.Word1}={pair.Word2}' as files are already downloaded");
                     pair.HasAudio = true;
@@ -76,8 +75,8 @@ namespace AudioDictionary
 
                 Console.WriteLine($"{counter}/{total} Downloading words pair '{pair.Word1}'='{pair.Word2}'");
 
-                webClient.DownloadFile(urlOggWord1, Path.Combine(WorkingDirectory, $"{pair.Word1}.ogg"));
-                webClient.DownloadFile(urlOggWord2, Path.Combine(WorkingDirectory, $"{pair.Word2}.ogg"));
+                webClient.DownloadFile(urlOggWord1, Environment.GetWorkingPathToOgg(pair.Word1));
+                webClient.DownloadFile(urlOggWord2, Environment.GetWorkingPathToOgg(pair.Word2));
                 pair.HasAudio = true;
             }
         }
@@ -157,7 +156,7 @@ namespace AudioDictionary
 
         internal virtual void GenerateAudioFile()
         {
-            var audioTool = new AudioTool(WorkingDirectory, Environment.SilenceFile);
+            var audioTool = new AudioTool();
 
             // 1. Get list of files to download
             var wordsList = ReadFilesListToDownload(Environment.WordsFile);
@@ -176,7 +175,7 @@ namespace AudioDictionary
             // 5. Merge all files into one result mp3
             Console.WriteLine();
             Console.WriteLine("Merging all files into one result MP3");
-            audioTool.MergeFiles(wordsList, Path.Combine(WorkingDirectory, Environment.OutputResultMp3));
+            audioTool.MergeFiles(wordsList);
 
             Console.WriteLine();
             Console.WriteLine();
