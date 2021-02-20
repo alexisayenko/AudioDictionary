@@ -12,8 +12,8 @@ namespace AudioDictionary
     {
         private readonly WebClient webClient = new WebClient();
 
-        protected virtual string Word1WikiBaseUrl { get; }
-        protected virtual string Word2WikiBaseUrl { get; }
+        protected virtual string[] Word1WikiBaseUrls { get; }
+        protected virtual string[] Word2WikiBaseUrls { get; }
 
         // public VocabularyType Type { get; private set; }
 
@@ -71,7 +71,6 @@ namespace AudioDictionary
                 counter++;
 
                 // Check if file exists
-
                 if (File.Exists(Path.Combine(WorkingDirectory, $"{pair.Word1}.ogg")) &&
                     File.Exists(Path.Combine(WorkingDirectory, $"{pair.Word2}.ogg")))
                 {
@@ -80,18 +79,20 @@ namespace AudioDictionary
                     continue;
                 }
 
-                // First, download En word from Oxford and En wiki
-                var urlOggEn = GetWord1SpecificDcitionaryUrl(pair.Word1);
-                if (string.IsNullOrEmpty(urlOggEn))
-                    urlOggEn = GetWikiUrl(Word1WikiBaseUrl, pair.Word1);
+                //var urlOggEn = GetWord1SpecificDcitionaryUrl(pair.Word1);
+                //if (string.IsNullOrEmpty(urlOggEn))
+                //    urlOggEn = GetWikiUrl(Word1WikiBaseUrl, pair.Word1);
 
-                if (string.IsNullOrEmpty(urlOggEn))
-                    Console.WriteLine("---> Not Found");
+                //if (string.IsNullOrEmpty(urlOggEn))
+                //    Console.WriteLine("---> Not Found");
+
+                var urlOggEn = GetOggUrl(GetWord1SpecificDcitionaryUrl, Word1WikiBaseUrls, pair.Word1);
 
                 // Then download Ru word from En and Ru wiki
-                var urlOggRu = GetWikiUrl(Word1WikiBaseUrl, pair.Word2);
-                if (string.IsNullOrEmpty(urlOggRu))
-                    urlOggRu = GetWikiUrl(Word2WikiBaseUrl, pair.Word2);
+                //var urlOggRu = GetWikiUrl(Word1WikiBaseUrl, pair.Word2);
+                //if (string.IsNullOrEmpty(urlOggRu))
+                //    urlOggRu = GetWikiUrl(Word2WikiBaseUrl, pair.Word2);
+                var urlOggRu = GetOggUrl(GetWord2SpecificDcitionaryUrl, Word2WikiBaseUrls, pair.Word2);
 
                 if (string.IsNullOrEmpty(urlOggRu) || string.IsNullOrEmpty(urlOggEn))
                 {
@@ -105,6 +106,30 @@ namespace AudioDictionary
                 webClient.DownloadFile(urlOggRu, Path.Combine(WorkingDirectory, $"{pair.Word2}.ogg"));
                 pair.HasAudio = true;
             }
+        }
+
+        /// <summary>
+        /// First, tries to download from language specific dicitionary (E.g. Oxford), then from wikitionary.
+        /// </summary>
+        /// <param name="wordSpecificDictionaryFunctor"></param>
+        /// <param name="wikiBaseUrls"></param>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        private string GetOggUrl(Func<string,string> wordSpecificDictionaryFunctor, string[] wikiBaseUrls, string word)
+        {
+            var urlOgg = wordSpecificDictionaryFunctor(word);
+            if (!string.IsNullOrEmpty(urlOgg))
+                return urlOgg;
+
+            foreach(var wikiBaseUrl in wikiBaseUrls)
+            {
+                urlOgg = GetWikiUrl(wikiBaseUrl, word);
+                if (!string.IsNullOrEmpty(urlOgg))
+                    return urlOgg;
+            }
+
+            Console.WriteLine("---> Not Found");
+            return default;
         }
 
         private string GetWikiUrl(string baseUrl, string word)

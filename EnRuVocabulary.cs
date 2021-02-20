@@ -13,8 +13,16 @@ namespace AudioDictionary
         private const string UlrEnBase = "https://www.oxfordlearnersdictionaries.com/us/media/english/us_pron_ogg";
         private const string UrlEnPostfix = "__us_1.ogg";
 
-        protected override string Word1WikiBaseUrl => "https://en.wiktionary.org/wiki";
-        protected override string Word2WikiBaseUrl => "https://ru.wiktionary.org/wiki";
+        protected override string[] Word1WikiBaseUrls => new[]
+        {
+            "https://en.wiktionary.org/wiki"
+        };
+
+        protected override string[] Word2WikiBaseUrls => new[]
+        {
+            "https://ru.wiktionary.org/wiki",
+            "https://en.wiktionary.org/wiki"
+        };
 
         protected override string GetWord1SpecificDcitionaryUrl(string word) => GetOxfordUrl(word);
         protected override string GetWord2SpecificDcitionaryUrl(string word) => null;
