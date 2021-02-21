@@ -27,40 +27,9 @@ namespace AudioDictionary
             if (Environment.IsLinux == false)
                 MediaFoundationInterop.MFStartup(0);
 
-            WordsFile = WordsFile ?? @"/tmp/words-list.txt";
-            OutputMp3File = OutputMp3File ?? "!result.mp3";
-            AudioPattern = AudioPattern ?? "RuDe 2..1.1.1.1.1...";
-        }
-
-        /// <summary>
-        /// Languages codes entries according to ISO 3166-2.
-        /// </summary>
-        /// <param name="languages"></param>
-        /// <returns></returns>
-        private static Tuple<ILanguage, ILanguage> ParseVocabularyType(string languagesCodes)
-        {
-            if (string.IsNullOrEmpty(languagesCodes) ||
-                string.IsNullOrWhiteSpace(languagesCodes) ||
-                languagesCodes.Length != 4)
-                throw new ApplicationException("Length of language ");
-
-            var code1 = languagesCodes.Substring(0, 2).ToUpper();
-            var code2 = languagesCodes.Substring(2, 2).ToUpper();
-
-            var stringToVocabularyTypeDictionary = new Dictionary<string, Func<ILanguage>>
-            {
-                { "DE", () => new LanguageDe() },
-                { "EN", () => new LanguageEn() },
-                { "RU", () => new LanguageRu() }
-            };
-
-            if (stringToVocabularyTypeDictionary.TryGetValue(code1, out Func<ILanguage> functor1) == false)
-                throw new ApplicationException("Language not found. Specify language according to ISO 3166-2 standard.");
-
-            if (stringToVocabularyTypeDictionary.TryGetValue(code2, out Func<ILanguage> functor2) == false)
-                throw new ApplicationException("Language not found. Specify language according to ISO 3166-2 standard.");
-
-            return new Tuple<ILanguage, ILanguage>(functor1(), functor2());
+            WordsFile ??= @"/tmp/words-list.txt";
+            OutputMp3File ??= "!result.mp3";
+            AudioPattern ??= "RuDe 1..2.2.2.2.2...";
         }
 
         static void Main(string[] args)
@@ -84,12 +53,7 @@ namespace AudioDictionary
 
             Console.WriteLine($"Reading words list from {WordsFile}");
 
-            var languagesCodes = ParseVocabularyType(AudioPattern.Substring(0, 4));
-
-            var vocabulary =
-                new Vocabulary(languagesCodes.Item1, languagesCodes.Item2);
-
-            vocabulary.GenerateAudioFile(WordsFile, OutputMp3File, AudioPattern);
+            Vocabulary.GenerateOutputMp3(WordsFile, OutputMp3File, AudioPattern);
         }
     }
 }

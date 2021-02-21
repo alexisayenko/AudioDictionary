@@ -12,6 +12,12 @@
 
         public string GetLanguageSpecificDcitionaryUrl(string word) => GetOxfordUrl(word);
 
+        public string TryToSeparateArticle(string word, out string article)
+        {
+            article = null;
+            return word;
+        }
+
         private string GetOxfordUrl(string word)
         {
             // todo: remove workaround

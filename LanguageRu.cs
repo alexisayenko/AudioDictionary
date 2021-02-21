@@ -15,5 +15,11 @@ namespace AudioDictionary
         };
 
         public string GetLanguageSpecificDcitionaryUrl(string word) => default;
+
+        public string TryToSeparateArticle(string word, out string article)
+        {
+            article = null;
+            return word;
+        }
     }
 }
