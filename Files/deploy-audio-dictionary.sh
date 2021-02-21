@@ -10,7 +10,8 @@ REMOTE_BIN_DIR=/opt/audio-dictionary/
 
 ### Functions
 show-message(){
-  echo -e "* \e[34m$1\e[39m *"
+  echo
+  echo -e "= \e[34m$1\e[39m ="
 }
 
 copy-full-package(){
@@ -44,8 +45,12 @@ cd $LOCAL_PROJECT_DIR
 show-message "dotnet publish -c $CONFIGURATION -f $FRAMEWORK -r $RUNTIME --self-contained"
 dotnet publish -c $CONFIGURATION -f $FRAMEWORK -r $RUNTIME --self-contained
 
-# copy-full-package
-copy-minimal
+if [ $1 == 'full' ]
+then
+  copy-full-package
+else
+  copy-minimal
+fi;
 
 scp $LOCAL_PROJECT_DIR/Files/audio-dictionary-generator.php alex-ocean:/var/www/html/
 
