@@ -17,6 +17,9 @@ namespace AudioDictionary
         [Argument('l', "languages", "Languages codes according to ISO 3166-2")]
         private static string Languages { get; set; }
 
+        [Argument('p', "audio-pattern", "Audio pattern for generating")]
+        private static string AudioPattern { get; set; }
+
         private static void InitializeVariables(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
@@ -26,6 +29,7 @@ namespace AudioDictionary
 
             WordsFile = WordsFile ?? @"/tmp/words-list.txt";
             OutputMp3File = OutputMp3File ?? "!result.mp3";
+            AudioPattern = AudioPattern ?? "EnRu 2..1.1.1.1.1...";
         }
 
         /// <summary>
@@ -85,7 +89,7 @@ namespace AudioDictionary
             var vocabulary =
                 new Vocabulary(languagesCodes.Item1, languagesCodes.Item2);
 
-            vocabulary.GenerateAudioFile(WordsFile, OutputMp3File);
+            vocabulary.GenerateAudioFile(WordsFile, OutputMp3File, AudioPattern);
         }
     }
 }

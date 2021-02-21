@@ -25,37 +25,6 @@ namespace AudioDictionary
             }
         }
 
-        private void MergeFilesWindows(WordPairList wordsList, string outputMp3File)
-        {
-            var outputStream = new FileStream(Environment.GetWorkingPathToFile(outputMp3File), FileMode.Create);
-
-            foreach (var word in wordsList)
-            {
-                if (!word.HasAudio)
-                    continue;
-
-                var fileName = Environment.GetWorkingPathToMp3(word.Word2);
-                MergeFileWindows(fileName, outputStream);
-                MergeFileWindows(Silence05sec, outputStream);
-                MergeFileWindows(Silence05sec, outputStream);
-
-                fileName = Environment.GetWorkingPathToMp3(word.Word1);
-                MergeFileWindows(fileName, outputStream);
-                MergeFileWindows(Silence05sec, outputStream);
-                MergeFileWindows(fileName, outputStream);
-                MergeFileWindows(Silence05sec, outputStream);
-                MergeFileWindows(fileName, outputStream);
-                MergeFileWindows(Silence05sec, outputStream);
-                MergeFileWindows(fileName, outputStream);
-                MergeFileWindows(Silence05sec, outputStream);
-                MergeFileWindows(fileName, outputStream);
-                MergeFileWindows(Silence05sec, outputStream);
-
-                MergeFileWindows(Silence05sec, outputStream);
-                MergeFileWindows(Silence05sec, outputStream);
-            }
-        }
-
         private static void MergeFileWindows(string fileName, FileStream outputStream)
         {
             var reader = new Mp3FileReader(fileName);
@@ -161,11 +130,6 @@ namespace AudioDictionary
 
             foreach (string file in inputFiles)
             {
-                // new WaveProvider
-                // MediaFoundationEncoder.EncodeToMp3(file,);
-
-
-
                 Mp3FileReader reader = new Mp3FileReader(file);
                 if ((outputStream.Position == 0) && (reader.Id3v2Tag != null))
                 {
@@ -179,30 +143,24 @@ namespace AudioDictionary
             }
         }
 
-        private void MergeFilesLinux(WordPairList wordsList, string outputMp3File)
+        private static void MergeFilesLinux(WordPairList wordsList, string outputMp3File, string pattern)
         {
             var lines = new List<string>();
-
+            Console.WriteLine($"Audio Pattern is {pattern}");
             foreach (var word in wordsList)
             {
                 if (!word.HasAudio)
                     continue;
 
-                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word2)}.mp3'");
-                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
-                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
-                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
-                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
-                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
-                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
-                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
-                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
-                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
-                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
-                lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
-                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
-                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
-                lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                foreach (var ch in pattern)
+                {
+                    if (ch == '2')
+                        lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word2)}.mp3'");
+                    else if (ch == '1')
+                        lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
+                    else if (ch=='.')
+                        lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                }
             }
 
             var textFile = Environment.GetWorkingPathToFile("mylist.txt");
@@ -214,12 +172,38 @@ namespace AudioDictionary
             ExecuteFFMPEG($" -y -f concat -safe 0 -i {textFile} -c copy {Environment.GetWorkingPathToFile(outputMp3File)}");
         }
 
-        public void MergeFiles(WordPairList wordsList, string outputMp3File)
+        private void MergeFilesWindows(WordPairList wordsList, string outputMp3File, string pattern)
+        {
+            var outputStream = new FileStream(Environment.GetWorkingPathToFile(outputMp3File), FileMode.Create);
+
+            foreach (var word in wordsList)
+            {
+                if (!word.HasAudio)
+                    continue;
+
+                foreach (var ch in pattern)
+                {
+                    string fileName;
+                    if (ch == '2')
+                        fileName = Environment.GetWorkingPathToMp3(word.Word2);
+                    else if (ch == '1')
+                        fileName = Environment.GetWorkingPathToMp3(word.Word1);
+                    else if (ch == '.')
+                        fileName = Silence05sec;
+                    else
+                        continue;
+
+                    MergeFileWindows(fileName, outputStream);
+                }
+            }
+        }
+
+        public void MergeFiles(WordPairList wordsList, string outputMp3File, string pattern)
         {
             if (Environment.IsLinux)
-                MergeFilesLinux(wordsList, outputMp3File);
+                MergeFilesLinux(wordsList, outputMp3File, pattern);
             else
-                MergeFilesWindows(wordsList, outputMp3File);
+                MergeFilesWindows(wordsList, outputMp3File, pattern);
         }
 
         public void NormalizeAudio(WordPairList wordsList)

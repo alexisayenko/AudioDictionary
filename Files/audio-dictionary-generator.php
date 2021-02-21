@@ -24,11 +24,13 @@
 
     <form class="pure-form-stacked" method="post" action="audio-dictionary-generator.php">
         <fieldset>
+            <input name="audio_pattern" type="text" value="EnRu 1..2.1.2.1.2...">
             <textarea maxlength="1000" style="resize:none;" rows="15" cols="70" name="user_input"></textarea>
             <input class="pure-button pure-button-primary" type="submit" class='button' value="Create" />
             <br /><br />
 
             <?php
+            $audio_pattern = $_POST['audio_pattern'];
             $user_input = $_POST['user_input'];
 
             if ($user_input == "")
@@ -48,7 +50,7 @@
 
             while (@ob_end_flush()); // end all output buffers if any
 
-            $proc = popen("/opt/audio-dictionary/AudioDictionary -w {$words_file_name} -o {$output_audio_file_name}", 'r');
+            $proc = popen("/opt/audio-dictionary/AudioDictionary -w {$words_file_name} -o {$output_audio_file_name} -p \"{$audio_pattern}\"", 'r');
 
             echo '<div style="white-space: pre-line;overflow-y:scroll;height:250px;width:600px">';
             while (!feof($proc)) {
