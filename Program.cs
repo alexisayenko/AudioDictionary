@@ -29,7 +29,10 @@ namespace AudioDictionary
 
             WordsFile ??= @"/tmp/words-list.txt";
             OutputMp3File ??= "!result.mp3";
-            AudioPattern ??= "RuDe 1..2.2.2.2.2...";
+            AudioPattern ??=
+                //"EnRu 2..1.1.1.1.1...";
+                //"RuDe 1..2.2.2.2.2...";
+                "DeDe 1..2...";
         }
 
         static void Main(string[] args)

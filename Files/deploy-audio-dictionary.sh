@@ -45,7 +45,7 @@ cd $LOCAL_PROJECT_DIR
 show-message "dotnet publish -c $CONFIGURATION -f $FRAMEWORK -r $RUNTIME --self-contained"
 dotnet publish -c $CONFIGURATION -f $FRAMEWORK -r $RUNTIME --self-contained
 
-if [ $1 = 'full' ]
+if [ "$1" == "full" ]
 then
   copy-full-package
 else
