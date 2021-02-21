@@ -16,18 +16,10 @@ namespace AudioDictionary
         public static string WorkingDirectory =>
             IsLinux ? @"/srv/audio-dictionary" : @"C:\Temp\AudioDictionary";
 
-        public static string WordsFile { get; internal set; }
-        
-        public static void SetOutputResultMp3 (string fileName)
-        {
-            WorkingPathToResultMp3 = GetWorkingPathToFile(fileName);
-        }
-
-        public static void SetSilenceFile(string fileName)
-        {
-            var binPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            WorkingPathToSilenceFile = Path.Combine(binPath, fileName);
-        }
+        //public static void SetOutputResultMp3(string fileName)
+        //{
+        //    WorkingPathToResultMp3 = GetWorkingPathToFile(fileName);
+        //}
 
         public static string GetWorkingPathToOgg(string word) =>
             Path.Combine(WorkingDirectory, $"{word}.ogg");
@@ -35,11 +27,21 @@ namespace AudioDictionary
         public static string GetWorkingPathToMp3(string word) =>
             Path.Combine(WorkingDirectory, $"{word}.mp3");
 
-        public static string WorkingPathToResultMp3 { get; private set; }
+//         public static string WorkingPathToResultMp3 { get; private set; }
 
         public static string GetWorkingPathToFile(string fileName) =>
             Path.Combine(WorkingDirectory, fileName);
 
-        public static string WorkingPathToSilenceFile { get; private set; }
+        public static string WorkingPathToSilenceFile
+        {
+            get
+            {
+                var fileName = Path.Combine("Files", "silence-0.5s.mp3");
+                var binPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                var workingPathToSilenceFile = Path.Combine(binPath, fileName);
+        
+                return workingPathToSilenceFile;
+            }
+        }
     }
 }

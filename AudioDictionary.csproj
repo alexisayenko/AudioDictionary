@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="NAudio.Vorbis" Version="1.2.0" />
+    <PackageReference Include="Utility.CommandLine.Arguments" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

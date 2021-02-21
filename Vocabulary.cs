@@ -154,12 +154,12 @@ namespace AudioDictionary
             return result;
         }
 
-        internal virtual void GenerateAudioFile()
+        internal virtual void GenerateAudioFile(string inputWordsFile, string outputMp3File)
         {
             var audioTool = new AudioTool();
 
             // 1. Get list of files to download
-            var wordsList = ReadFilesListToDownload(Environment.WordsFile);
+            var wordsList = ReadFilesListToDownload(inputWordsFile);
 
             // 2. Download files
             DownloadAudio(wordsList);
@@ -175,7 +175,7 @@ namespace AudioDictionary
             // 5. Merge all files into one result mp3
             Console.WriteLine();
             Console.WriteLine("Merging all files into one result MP3");
-            audioTool.MergeFiles(wordsList);
+            audioTool.MergeFiles(wordsList, outputMp3File);
 
             Console.WriteLine();
             Console.WriteLine();

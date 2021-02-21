@@ -25,9 +25,9 @@ namespace AudioDictionary
             }
         }
 
-        private void MergeFilesWindows(WordPairList wordsList)
+        private void MergeFilesWindows(WordPairList wordsList, string outputMp3File)
         {
-            var outputStream = new FileStream(Environment.WorkingPathToResultMp3, FileMode.Create);
+            var outputStream = new FileStream(Environment.GetWorkingPathToFile(outputMp3File), FileMode.Create);
 
             foreach (var word in wordsList)
             {
@@ -179,7 +179,7 @@ namespace AudioDictionary
             }
         }
 
-        private void MergeFilesLinux(WordPairList wordsList)
+        private void MergeFilesLinux(WordPairList wordsList, string outputMp3File)
         {
             var lines = new List<string>();
 
@@ -211,15 +211,15 @@ namespace AudioDictionary
 
             Thread.Sleep(1000);
 
-            ExecuteFFMPEG($" -y -f concat -safe 0 -i {textFile} -c copy {Environment.WorkingPathToResultMp3}");
+            ExecuteFFMPEG($" -y -f concat -safe 0 -i {textFile} -c copy {Environment.GetWorkingPathToFile(outputMp3File)}");
         }
 
-        public void MergeFiles(WordPairList wordsList)
+        public void MergeFiles(WordPairList wordsList, string outputMp3File)
         {
             if (Environment.IsLinux)
-                MergeFilesLinux(wordsList);
+                MergeFilesLinux(wordsList, outputMp3File);
             else
-                MergeFilesWindows(wordsList);
+                MergeFilesWindows(wordsList, outputMp3File);
         }
 
         public void NormalizeAudio(WordPairList wordsList)

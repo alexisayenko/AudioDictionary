@@ -48,7 +48,7 @@
 
             while (@ob_end_flush()); // end all output buffers if any
 
-            $proc = popen("/opt/audio-dictionary/AudioDictionary {$words_file_name} {$output_audio_file_name}", 'r');
+            $proc = popen("/opt/audio-dictionary/AudioDictionary -w {$words_file_name} -o {$output_audio_file_name}", 'r');
 
             echo '<div style="white-space: pre-line;overflow-y:scroll;height:250px;width:600px">';
             while (!feof($proc)) {

@@ -3,11 +3,21 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Utility.CommandLine;
 
 namespace AudioDictionary
 {
     class Program
     {
+        [Argument('w', "words-file", "Full path to logs file")]
+        private static string WordsFile { get; set; }
+
+        [Argument('o', "output-file", "Output MP3 file")]
+        private static string OutputMp3File { get; set; }
+
+        [Argument('l', "languages", "Languages codes according to ISO 3166-2")]
+        private static string Languages { get; set; }
+
         private static void InitializeVariables(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
@@ -15,9 +25,9 @@ namespace AudioDictionary
             if (Environment.IsLinux == false)
                 MediaFoundationInterop.MFStartup(0);
 
-            Environment.SetSilenceFile(Path.Combine("Files", "silence-0.5s.mp3"));
-            Environment.WordsFile = args.Length > 0 ? args[0] : @"/tmp/words-list.txt";
-            Environment.SetOutputResultMp3(args.Length > 1 ? args[1] : "!result.mp3");
+            WordsFile = WordsFile ?? @"/tmp/words-list.txt";
+            OutputMp3File = OutputMp3File ?? "!result.mp3";
+//            Environment.SetOutputResultMp3(OutputMp3File ?? "!result.mp3");
         }
 
         /// <summary>
@@ -55,22 +65,29 @@ namespace AudioDictionary
         {
             try
             {
-                InitializeVariables(args);
-
-                Console.WriteLine($"Reading words list from {Environment.WordsFile}");
-
-                var languagesCodes = args.Length > 2 ? ParseVocabularyType(args[2]) : new Tuple<ILanguage, ILanguage>(new LanguageEn(), new LanguageRu());
-
-                var vocabulary =
-                    new Vocabulary(languagesCodes.Item1, languagesCodes.Item2);
-
-                vocabulary.GenerateAudioFile();
+                main(args);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 throw;
             }
+        }
+
+        private static void main(string[] args)
+        {
+            Arguments.Populate();
+
+            InitializeVariables(args);
+
+            Console.WriteLine($"Reading words list from {WordsFile}");
+
+            var languagesCodes = ParseVocabularyType(Languages ?? "EnRu");
+
+            var vocabulary =
+                new Vocabulary(languagesCodes.Item1, languagesCodes.Item2);
+
+            vocabulary.GenerateAudioFile(WordsFile, OutputMp3File);
         }
     }
 }
