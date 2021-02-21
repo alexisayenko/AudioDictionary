@@ -29,7 +29,7 @@ namespace AudioDictionary
 
             WordsFile = WordsFile ?? @"/tmp/words-list.txt";
             OutputMp3File = OutputMp3File ?? "!result.mp3";
-            AudioPattern = AudioPattern ?? "EnRu 2..1.1.1.1.1...";
+            AudioPattern = AudioPattern ?? "RuDe 2..1.1.1.1.1...";
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace AudioDictionary
 
             Console.WriteLine($"Reading words list from {WordsFile}");
 
-            var languagesCodes = ParseVocabularyType(Languages ?? "EnRu");
+            var languagesCodes = ParseVocabularyType(AudioPattern.Substring(0, 4));
 
             var vocabulary =
                 new Vocabulary(languagesCodes.Item1, languagesCodes.Item2);

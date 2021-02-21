@@ -2,11 +2,12 @@
 {
     internal class LanguageDe : ILanguage
     {
-        public string[] WikiBaseUrls => throw new System.NotImplementedException();
-
-        public string GetLanguageSpecificDcitionaryUrl(string word)
+        public string[] WikiBaseUrls => new[]
         {
-            throw new System.NotImplementedException();
-        }
+            "https://de.wiktionary.org/wiki",
+            "https://en.wiktionary.org/wiki"
+        };
+
+        public string GetLanguageSpecificDcitionaryUrl(string word) => default;
     }
 }

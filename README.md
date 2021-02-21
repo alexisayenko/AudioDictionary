@@ -35,7 +35,7 @@ TODO:
 - if _us_1 does not exist, try _us_2 autuomatically
 + restrict max lines
 + amend deploy script to deploy also the website
-- add support german russian dicitonary
++ add support german russian dicitonary
 - add support for german articles in front
 - add support for german single-plural dictionary
 + display data to diffirentiate betweem releases. E.g. auto increment release/build number and display somewhere in php page.
