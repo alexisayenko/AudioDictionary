@@ -40,7 +40,8 @@ TODO:
 - add support for german single-plural dictionary
 + display data to diffirentiate betweem releases. E.g. auto increment release/build number and display somewhere in php page.
 - add support for multiple meanings (объект, предмет, вещь = der Gegenstand)
-- user shuld be able choose way of dictionary (en->ru, ru->en, de->ru, etc)
++ add backend support for specifying langugaes: EnRu, RuDe, etc
+- add frontend support for specifying langugaes: EnRu, RuDe, etc
 - add images, styles of page
 - add audiopattern to generate vocabulary: Ru.Pause.Pause.En.En.En.En.En.Pause.Pause.Pause
 - add logging

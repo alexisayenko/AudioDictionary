@@ -1,7 +1,6 @@
 ﻿using NAudio.MediaFoundation;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using Utility.CommandLine;
 
@@ -27,7 +26,6 @@ namespace AudioDictionary
 
             WordsFile = WordsFile ?? @"/tmp/words-list.txt";
             OutputMp3File = OutputMp3File ?? "!result.mp3";
-//            Environment.SetOutputResultMp3(OutputMp3File ?? "!result.mp3");
         }
 
         /// <summary>
