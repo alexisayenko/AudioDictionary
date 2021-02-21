@@ -55,11 +55,18 @@ namespace AudioDictionary
 
         private static void TryDownloadAudio(Lexeme lexeme)
         {
+            if (!Environment.IsOggExist(lexeme.Article))
+            {
+                var urlOggArticle = lexeme.Language.GetArticleUrl(lexeme.Article);
+                lexeme.HasArticleAudio = TryDownloadAudio(lexeme.Article, urlOggArticle, webClient);
+            }
+            else
+            {
+                lexeme.HasArticleAudio = true;
+            }
+
             if (Environment.IsOggExist(lexeme.Word))
                 return;
-
-            var urlOggArticle = lexeme.Language.GetArticleUrl(lexeme.Article);
-            lexeme.HasArticleAudio = TryDownloadAudio(lexeme.Article, urlOggArticle, webClient);
 
             var urlOggWord = GetOggUrl(lexeme.Language, lexeme.Word);
             lexeme.HasWordAudio = TryDownloadAudio(lexeme.Word, urlOggWord, webClient);
@@ -76,6 +83,7 @@ namespace AudioDictionary
                 return false;
             }
 
+            Console.WriteLine($"  Downloading '{word}'");
             webClient.DownloadFile(url, Environment.GetWorkingPathToOgg(word));
             return true;
         }
