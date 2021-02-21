@@ -10,18 +10,18 @@ namespace AudioDictionary
 {
     internal static class AudioTool
     {
-        public static void ConvertDownloadedAudio(WordPairList wordsList)
+        public static void ConvertDownloadedAudio(Vocabulary vocabulary)
         {
-            foreach (var word in wordsList)
+            foreach (var pair in vocabulary)
             {
-                if (!word.HasAudio)
+                if (!pair.HasAudio)
                     continue;
 
-                ConvertOggToMp3(word.Article1);
-                ConvertOggToMp3(word.Article2);
+                ConvertOggToMp3(pair.Lexeme1.Article);
+                ConvertOggToMp3(pair.Lexeme2.Article);
 
-                word.HasAudio = ConvertOggToMp3(word.Word1);
-                word.HasAudio &= ConvertOggToMp3(word.Word2);
+                pair.Lexeme1.HasWordAudio = ConvertOggToMp3(pair.Lexeme1.Word);
+                pair.Lexeme2.HasWordAudio = ConvertOggToMp3(pair.Lexeme2.Word);
             }
         }
 
@@ -153,23 +153,36 @@ namespace AudioDictionary
             }
         }
 
-        private static void MergeFilesLinux(WordPairList wordsList, string outputMp3File, string pattern)
+        private static void MergeFilesLinux(Vocabulary pairsList, string outputMp3File, string pattern)
         {
             var lines = new List<string>();
             Console.WriteLine($"Audio Pattern is {pattern}");
-            foreach (var word in wordsList)
+            foreach (var pair in pairsList)
             {
-                if (!word.HasAudio)
+                if (!pair.HasAudio)
                     continue;
+
+                var lexeme1 = pair.Lexeme1;
+                var lexeme2 = pair.Lexeme2;
 
                 foreach (var ch in pattern)
                 {
-                    if (ch == '2')
-                        lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word2)}.mp3'");
-                    else if (ch == '1')
-                        lines.Add($"file '{Environment.GetWorkingPathToFile(word.Word1)}.mp3'");
-                    else if (ch == '.')
-                        lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                    switch (ch)
+                    {
+                        case '.':
+                            lines.Add($"file '{Environment.WorkingPathToSilenceFile}'");
+                            break;
+                        case '1':
+                            if (lexeme1.HasArticleAudio)
+                                lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme1.Article)}'");                        
+                            lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme1.Word)}'");
+                            break;
+                        case '2':
+                            if (lexeme2.HasArticleAudio)
+                                lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme2.Article)}'");
+                            lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme2.Word)}'");
+                            break;
+                    }
                 }
             }
 
@@ -182,13 +195,13 @@ namespace AudioDictionary
             ExecuteFFMPEG($" -y -f concat -safe 0 -i {textFile} -c copy {Environment.GetWorkingPathToFile(outputMp3File)}");
         }
 
-        private static void MergeFilesWindows(WordPairList wordsList, string outputMp3File, string pattern)
+        private static void MergeFilesWindows(Vocabulary vocabulary, string outputMp3File, string pattern)
         {
             var outputStream = new FileStream(Environment.GetWorkingPathToFile(outputMp3File), FileMode.Create);
 
-            foreach (var word in wordsList)
+            foreach (var pair in vocabulary)
             {
-                if (!word.HasAudio)
+                if (!pair.HasAudio)
                     continue;
 
                 foreach (var ch in pattern)
@@ -201,15 +214,15 @@ namespace AudioDictionary
                             MergeFileWindows(fileName, outputStream);
                             break;
                         case '1':
-                            fileName = Environment.GetWorkingPathToMp3(word.Article1);
+                            fileName = Environment.GetWorkingPathToMp3(pair.Lexeme1.Article);
                             MergeFileWindows(fileName, outputStream);
-                            fileName = Environment.GetWorkingPathToMp3(word.Word1);
+                            fileName = Environment.GetWorkingPathToMp3(pair.Lexeme1.Word);
                             MergeFileWindows(fileName, outputStream);
                             break;
                         case '2':
-                            fileName = Environment.GetWorkingPathToMp3(word.Article2);
+                            fileName = Environment.GetWorkingPathToMp3(pair.Lexeme2.Article);
                             MergeFileWindows(fileName, outputStream);
-                            fileName = Environment.GetWorkingPathToMp3(word.Word2);
+                            fileName = Environment.GetWorkingPathToMp3(pair.Lexeme2.Word);
                             MergeFileWindows(fileName, outputStream);
                             break;
                     }
@@ -217,7 +230,7 @@ namespace AudioDictionary
             }
         }
 
-        public static void MergeFiles(WordPairList wordsList, string outputMp3File, string pattern)
+        public static void MergeFiles(Vocabulary wordsList, string outputMp3File, string pattern)
         {
             if (Environment.IsLinux)
                 MergeFilesLinux(wordsList, outputMp3File, pattern);
@@ -225,7 +238,7 @@ namespace AudioDictionary
                 MergeFilesWindows(wordsList, outputMp3File, pattern);
         }
 
-        public static void NormalizeAudio(WordPairList wordsList)
+        public static void NormalizeAudio(Vocabulary wordsList)
         {
             // Trim empy sound
             // Normalize Volume

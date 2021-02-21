@@ -14,6 +14,10 @@
         /// <param name="word"></param>
         /// <returns></returns>
         string GetLanguageSpecificDcitionaryUrl(string word);
-        string TryToSeparateArticle(string word, out string article);
+        string TryToSeparateArticle(string word, out string article)
+        {
+            article = null;
+            return word;
+        }
     }
 }

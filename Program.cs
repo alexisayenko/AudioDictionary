@@ -53,7 +53,7 @@ namespace AudioDictionary
 
             Console.WriteLine($"Reading words list from {WordsFile}");
 
-            Vocabulary.GenerateOutputMp3(WordsFile, OutputMp3File, AudioPattern);
+            Helper.GenerateOutputMp3(WordsFile, OutputMp3File, AudioPattern);
         }
     }
 }
