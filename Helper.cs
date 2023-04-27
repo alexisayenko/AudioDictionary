@@ -3,13 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace AudioDictionary
 {
     internal static class Helper
     {
-        private static readonly WebClient webClient = new WebClient();
+
+        static Helper()
+        {
+            httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("<My Name>/1.0 (<My Email>) bot");
+        }
+        
+        private static readonly HttpClient httpClient;
+
+//        private static readonly WebClient webClient = new WebClient();
 
         [Obsolete]
         private static void DownloadFiles(Vocabulary vocabulary, string outputFolder, Func<string, string> formUrlFunctor)
@@ -58,7 +69,7 @@ namespace AudioDictionary
             if (!Environment.IsOggExist(lexeme.Article))
             {
                 var urlOggArticle = lexeme.Language.GetArticleUrl(lexeme.Article);
-                lexeme.HasArticleAudio = TryDownloadAudio(lexeme.Article, urlOggArticle, webClient);
+                lexeme.HasArticleAudio = TryDownloadAudioAsync(lexeme.Article, urlOggArticle, httpClient).Result;
             }
             else
             {
@@ -69,10 +80,10 @@ namespace AudioDictionary
                 return;
 
             var urlOggWord = GetOggUrl(lexeme.Language, lexeme.Word);
-            lexeme.HasWordAudio = TryDownloadAudio(lexeme.Word, urlOggWord, webClient);
+            lexeme.HasWordAudio = TryDownloadAudioAsync(lexeme.Word, urlOggWord, httpClient).Result;
         }
 
-        private static bool TryDownloadAudio(string word, string url, WebClient webClient)
+        private static async Task<bool> TryDownloadAudioAsync(string word, string url, HttpClient httpClient)
         {
             if (string.IsNullOrEmpty(word))
                 return false;
@@ -84,8 +95,21 @@ namespace AudioDictionary
             }
 
             Console.WriteLine($"  Downloading '{word}'");
-            webClient.DownloadFile(url, Environment.GetWorkingPathToOgg(word));
+            //httpClient.DownloadFile(url, Environment.GetWorkingPathToOgg(word));
+            await GetFile(httpClient, Environment.GetWorkingPathToOgg(word), url);
+
             return true;
+        }
+
+        private static async Task GetFile(HttpClient httpClient, string filepath, string url)
+        {
+            using (var stream = await httpClient.GetStreamAsync(new Uri(url)))
+            {
+                using (var fileStream = new FileStream(filepath, FileMode.CreateNew))
+                {
+                    await stream.CopyToAsync(fileStream);
+                }
+            }
         }
 
         /// <summary>
@@ -106,7 +130,7 @@ namespace AudioDictionary
 
             foreach (var wikiBaseUrl in language.WikiBaseUrls)
             {
-                urlOgg = GetWikiUrl(wikiBaseUrl, word);
+                urlOgg = GetWikiUrlAsync(wikiBaseUrl, word).Result;
                 if (!string.IsNullOrEmpty(urlOgg))
                     return urlOgg;
             }
@@ -115,13 +139,13 @@ namespace AudioDictionary
             return default;
         }
 
-        private static string GetWikiUrl(string baseUrl, string word)
+        private static async Task<string> GetWikiUrlAsync(string baseUrl, string word)
         {
             string urlOgg = null;
 
             try
             {
-                var html = webClient.DownloadString($"{baseUrl}/{word}");
+                var html = await httpClient.GetStringAsync($"{baseUrl}/{word}");
                 var matches = Regex.Match(html, "<source src=\"//upload.wikimedia.org/wikipedia/commons.+\\.ogg\" type");
 
                 //if (!matches.Success)

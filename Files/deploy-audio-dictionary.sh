@@ -5,7 +5,8 @@ CONFIGURATION=Release
 RUNTIME="ubuntu.20.04-x64" #"debian.10-x64"
 FRAMEWORK=net5.0
 
-LOCAL_PROJECT_DIR=/mnt/c/Alex/AudioDictionary/
+LOCAL_PROJECT_DIR=/mnt/c/Alex/AudioDictionary
+#/mnt/c/Users/alex.isayenko/source/repos/alexisayenko/AudioDictionary
 REMOTE_BIN_DIR=/opt/audio-dictionary/
 
 ### Functions
