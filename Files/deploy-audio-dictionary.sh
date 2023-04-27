@@ -2,10 +2,11 @@
 
 ### Variables
 CONFIGURATION=Release
-RUNTIME="ubuntu.20.04-x64" #"debian.10-x64"
-FRAMEWORK=net5.0
+RUNTIME="ubuntu.22.04-x64" #"debian.10-x64"
+FRAMEWORK=net7.0
 
-LOCAL_PROJECT_DIR=/mnt/c/Alex/AudioDictionary
+LOCAL_PROJECT_DIR=/Users/aisayenko/Documents/AudioDictionary
+#/mnt/c/Alex/AudioDictionary
 #/mnt/c/Users/alex.isayenko/source/repos/alexisayenko/AudioDictionary
 REMOTE_BIN_DIR=/opt/audio-dictionary/
 
@@ -17,8 +18,9 @@ show-message(){
 
 copy-full-package(){
   show-message "archiving files"
-  cd ./bin/$CONFIGURATION/$FRAMEWORK/$RUNTIME/publish/
-  tar -cJf audio-dictionary.tar.xz .
+  # cd ./bin/$CONFIGURATION/$FRAMEWORK/$RUNTIME/publish/
+  cd $LOCAL_PROJECT_DIR
+  tar -cJf audio-dictionary.tar.xz  ./bin/$CONFIGURATION/$FRAMEWORK/$RUNTIME/publish/
 
   show-message "copy files"
   scp audio-dictionary.tar.xz alex-ocean:/tmp/

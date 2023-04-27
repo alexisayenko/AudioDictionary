@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace AudioDictionary
         static Helper()
         {
             httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("<My Name>/1.0 (<My Email>) bot");
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatiblDe; AcmeInc/1.0)");
         }
         
         private static readonly HttpClient httpClient;
