@@ -27,12 +27,14 @@ namespace AudioDictionary
             if (Environment.IsLinux == false)
                 MediaFoundationInterop.MFStartup(0);
 
-            WordsFile ??= @"/tmp/words-list.txt";
+            WordsFile ??= @"C:\Alex\AudioDictionary\Files\words-list-en-ru.txt";
+                // @"/tmp/words-list.txt";
+
             OutputMp3File ??= "!result.mp3";
             AudioPattern ??=
-                //"EnRu 2..1.1.1.1.1...";
+                "EnRu 2..1.1.1.1.1...";
                 //"RuDe 1..2.2.2.2.2...";
-                "DeDe 1..2...";
+                //"DeDe 1..2...";
         }
 
         static void Main(string[] args)
