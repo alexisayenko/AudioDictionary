@@ -20,7 +20,7 @@ copy-full-package(){
   show-message "archiving files"
   # cd ./bin/$CONFIGURATION/$FRAMEWORK/$RUNTIME/publish/
   cd $LOCAL_PROJECT_DIR
-  tar -cJf audio-dictionary.tar.xz  ./bin/$CONFIGURATION/$FRAMEWORK/$RUNTIME/publish/
+  tar -C ./bin/$CONFIGURATION/$FRAMEWORK/$RUNTIME/publish/ -cJf audio-dictionary.tar.xz .
 
   show-message "copy files"
   scp audio-dictionary.tar.xz alex-ocean:/tmp/
