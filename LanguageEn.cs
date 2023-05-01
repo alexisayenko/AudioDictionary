@@ -28,9 +28,12 @@ namespace AudioDictionary
 
             html = matches.Value;
 
-            var i = html.IndexOf("data-src-ogg=\"https://www.oxfordlearnersdictionaries.com/media/english/us_pron");
-            html = html.Substring(i + 14);
-
+            var iBegin = html.IndexOf("data-src-ogg=\"https://www.oxfordlearnersdictionaries.com/media/english/us_pron");
+            html = html.Substring(iBegin + 14);
+            
+            var iEnd = html.IndexOf(".ogg");
+            html = html.Substring(0, iEnd + 4);
+           
             return html; 
         }
 
