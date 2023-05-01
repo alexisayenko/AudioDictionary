@@ -3,9 +3,10 @@
 Used components
 ---------------
 - https://purecss.io/ - A set of small, responsive CSS modules
-- php 7.3
+- php 8.1
+- apache2
 - ffmpeg
-- .NET Core 3.1
+- .NET 7
 - NAudio
 - C# 8
 
