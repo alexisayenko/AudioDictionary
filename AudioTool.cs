@@ -87,7 +87,7 @@ namespace AudioDictionary
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "ffmpeg",
-                    Arguments = $" -hide_banner -loglevel panic {parameters}",
+                    Arguments = $" -hide_banner -loglevel trace {parameters}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
