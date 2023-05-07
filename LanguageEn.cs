@@ -71,6 +71,8 @@ namespace AudioDictionary
         {
             if (word == "anytime")
                 word = "any-time";
+            if (word == "entrance")
+                word = "entrance1";
         }
     }
 }

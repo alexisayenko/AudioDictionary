@@ -9,4 +9,7 @@ patio = патио
 fire = огонь
 balcony = балкон
 basement = подвал
-
+staircase = лестница
+entrance = вход
+elevator = лифт
+tile = плитка
