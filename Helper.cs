@@ -96,7 +96,7 @@ namespace AudioDictionary
 
             Console.WriteLine($"  Downloading '{word}'");
             //httpClient.DownloadFile(url, Environment.GetWorkingPathToOgg(word));
-            await GetFile(httpClient, Environment.GetWorkingPathToOgg(word), url);
+            await GetFile(httpClient, Environment.GetWorkingPathToOgg(word.Replace(' ', '-')), url);
 
             return true;
         }
