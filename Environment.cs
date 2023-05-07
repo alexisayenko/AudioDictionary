@@ -25,7 +25,7 @@ namespace AudioDictionary
             Path.Combine(WorkingDirectory, $"{word}.ogg");
 
         public static string GetWorkingPathToMp3(string word) => 
-            string.IsNullOrEmpty(word) ? default : Path.Combine(WorkingDirectory, $"{word}.mp3");
+            string.IsNullOrEmpty(word) ? default : Path.Combine(WorkingDirectory, $"{word.Replace(' ', '-')}.mp3");
 
         public static string GetWorkingPathToFile(string fileName) =>
             Path.Combine(WorkingDirectory, fileName);

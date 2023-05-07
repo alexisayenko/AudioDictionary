@@ -107,6 +107,7 @@ namespace AudioDictionary
         private static void EncodeToMp3Linux(string filename)
         {
             var outputFile = Environment.GetWorkingPathToMp3(Path.GetFileNameWithoutExtension(filename));
+            outputFile = outputFile.Replace(' ', '-');
             var parameters = $" -i {filename} -vn -n -ar 44100 -ac 2 -b:a 128k {outputFile}";
 
             ExecuteFFMPEG(parameters);
