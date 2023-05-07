@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 
 namespace AudioDictionary
@@ -21,8 +22,17 @@ namespace AudioDictionary
         {
             HandleSpecificWordsExceptions(ref word);
 
+            word = word.Replace(' ', '-');
+            var html = string.Empty;
+            try
+            {
+                html = new HttpClient().GetStringAsync($"{UrlBaseOxford}/{word}").Result;
 
-            var html = new HttpClient().GetStringAsync($"{UrlBaseOxford}/{word}").Result;
+            }
+            catch
+            {
+                Console.WriteLine($"Could not get url for word {word}.");
+            }
 
             var matches = Regex.Match(html, "class=\"sound audio_play_button pron-us icon-audio\".+\\.ogg");
 

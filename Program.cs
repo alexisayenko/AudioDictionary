@@ -33,8 +33,9 @@ namespace AudioDictionary
             OutputMp3File ??= "!result.mp3";
             AudioPattern ??=
                 "EnRu 2..1.1.1.1.1...";
-                //"RuDe 1..2.2.2.2.2...";
-                //"DeDe 1..2...";
+            //"RuDe 1..2.2.2.2.2...";
+            //"DeDe 1..2...";
+            //"EnRu 1..2.1.2.1.2...";
         }
 
         static void Main(string[] args)

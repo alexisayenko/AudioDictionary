@@ -1,3 +1,16 @@
+courtyard = двор-колодец
+swimming pool = бассейн
+central heating = газовое отопление
+garden = сад
+loft = лофт
+room terrace
+garage = гараж
+patio = патио
+fire = огонь
+balcony = балкон
+basement = подвал
+
+
 quite	=	вполне
 act	=	действовать
 already	=	уже
