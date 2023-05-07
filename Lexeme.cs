@@ -20,6 +20,7 @@ namespace AudioDictionary
         public string Word { get; private set; }
         public bool HasArticle => string.IsNullOrEmpty(Article);
         public bool HasArticleAudio { get; set; }
+        public string WordNormalized => Word.Replace(' ', '-');
 
         public bool HasWordAudio { get; set; }
 

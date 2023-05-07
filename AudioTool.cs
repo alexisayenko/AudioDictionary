@@ -20,8 +20,8 @@ namespace AudioDictionary
                 ConvertOggToMp3(pair.Lexeme1.Article);
                 ConvertOggToMp3(pair.Lexeme2.Article);
 
-                pair.Lexeme1.HasWordAudio = ConvertOggToMp3(pair.Lexeme1.Word);
-                pair.Lexeme2.HasWordAudio = ConvertOggToMp3(pair.Lexeme2.Word);
+                pair.Lexeme1.HasWordAudio = ConvertOggToMp3(pair.Lexeme1.WordNormalized);
+                pair.Lexeme2.HasWordAudio = ConvertOggToMp3(pair.Lexeme2.WordNormalized);
             }
         }
 
@@ -178,12 +178,12 @@ namespace AudioDictionary
                         case '1':
                             if (lexeme1.HasArticleAudio)
                                 lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme1.Article)}'");                        
-                            lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme1.Word)}'");
+                            lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme1.WordNormalized)}'");
                             break;
                         case '2':
                             if (lexeme2.HasArticleAudio)
                                 lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme2.Article)}'");
-                            lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme2.Word)}'");
+                            lines.Add($"file '{Environment.GetWorkingPathToMp3(lexeme2.WordNormalized)}'");
                             break;
                     }
                 }
@@ -219,13 +219,13 @@ namespace AudioDictionary
                         case '1':
                             fileName = Environment.GetWorkingPathToMp3(pair.Lexeme1.Article);
                             MergeFileWindows(fileName, outputStream);
-                            fileName = Environment.GetWorkingPathToMp3(pair.Lexeme1.Word);
+                            fileName = Environment.GetWorkingPathToMp3(pair.Lexeme1.WordNormalized);
                             MergeFileWindows(fileName, outputStream);
                             break;
                         case '2':
                             fileName = Environment.GetWorkingPathToMp3(pair.Lexeme2.Article);
                             MergeFileWindows(fileName, outputStream);
-                            fileName = Environment.GetWorkingPathToMp3(pair.Lexeme2.Word);
+                            fileName = Environment.GetWorkingPathToMp3(pair.Lexeme2.WordNormalized);
                             MergeFileWindows(fileName, outputStream);
                             break;
                     }

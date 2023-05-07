@@ -29,7 +29,7 @@ namespace AudioDictionary
 
             foreach (var pair in vocabulary)
             {
-                var outputFile = $"{outputFolder}/{pair.Lexeme1.Word}.ogg";
+                var outputFile = $"{outputFolder}/{pair.Lexeme1.WordNormalized}.ogg";
 
                 if (File.Exists(outputFile))
                     continue;
@@ -57,10 +57,10 @@ namespace AudioDictionary
                 TryDownloadAudio(pair.Lexeme2);
 
                 pair.Lexeme1.HasWordAudio =
-                    Environment.IsOggExist(pair.Lexeme1.Word);
+                    Environment.IsOggExist(pair.Lexeme1.WordNormalized);
 
                 pair.Lexeme2.HasWordAudio =
-                     Environment.IsOggExist(pair.Lexeme2.Word);
+                     Environment.IsOggExist(pair.Lexeme2.WordNormalized);
             }
         }
 
@@ -76,10 +76,10 @@ namespace AudioDictionary
                 lexeme.HasArticleAudio = true;
             }
 
-            if (Environment.IsOggExist(lexeme.Word))
+            if (Environment.IsOggExist(lexeme.WordNormalized))
                 return;
 
-            var urlOggWord = GetOggUrl(lexeme.Language, lexeme.Word);
+            var urlOggWord = GetOggUrl(lexeme.Language, lexeme.WordNormalized);
             lexeme.HasWordAudio = TryDownloadAudioAsync(lexeme.Word, urlOggWord, httpClient).Result;
         }
 
