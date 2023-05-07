@@ -82,6 +82,8 @@ namespace AudioDictionary
 
         private static void ExecuteFFMPEG(string parameters)
         {
+            Console.WriteLine($"ffmpeg -hide_banner -loglevel trace {parameters}");
+
             Process proc = new Process
             {
                 StartInfo = new ProcessStartInfo
