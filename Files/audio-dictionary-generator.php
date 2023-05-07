@@ -24,7 +24,7 @@
 
     <form class="pure-form-stacked" method="post" action="audio-dictionary-generator.php">
         <fieldset>
-            <input name="audio_pattern" type="text" value="EnRu 1..2.1.2.1.2...">
+            <input name="audio_pattern" type="text" value="EnRu 2.1.1.1.1.1.1.1.1.1.1...">
             <textarea maxlength="1000" style="resize:none;" rows="15" cols="70" name="user_input"></textarea>
             <input class="pure-button pure-button-primary" type="submit" class='button' value="Create" />
             <br /><br />
